@@ -64,6 +64,20 @@ const guilds = {
     orderChannelId: '1520728813749932153',
     logChannelId: '1520732663152119908',
   },
+
+  // ===== Serveur supplémentaire =====
+  '1522265123811754044': {
+    staffRoleIds: ['1522265123811754044'], // rôle staff — commandes /panel, /commande, /setsuivi…
+    customerRoleId: '',
+    graphisteRoleIds: [],
+    staffSlashPermission: 'ManageChannels',
+
+    ticketCategoryIds: [],
+    reviewValidationChannelId: '',
+    reviewPublicChannelId: '',
+    orderChannelId: '',
+    logChannelId: '',
+  },
 };
 
 // --- RÉGLAGES COMMUNS (à tous les serveurs) --------------------------
