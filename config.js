@@ -1,0 +1,132 @@
+// =====================================================================
+//  CONFIGURATION DU BOT (multi-serveurs)
+//
+//  Le bot peut gérer PLUSIEURS serveurs en même temps.
+//  - Les réglages "communs" (plus bas dans `shared`) valent pour tous.
+//  - Les rôles et salons se règlent PAR SERVEUR dans `guilds`, avec l'ID
+//    du serveur comme clé.
+//
+//  Pour copier un ID : active le Mode Développeur dans Discord
+//  (Paramètres > Avancés > Mode développeur), puis clic droit > Copier l'ID.
+// =====================================================================
+
+// --- RÉGLAGES PAR SERVEUR --------------------------------------------
+// Ajoute un bloc par serveur, avec l'ID du serveur comme clé.
+const guilds = {
+  // ===== Serveur "31 Lab's" =====
+  '1486375983434174516': {
+    staffRoleIds: ['1486487458299383838'],          // rôle(s) staff (pastille verte, validations…)
+    customerRoleId: '1486487635751862362',        // rôle client (requis pour /avis, donné à la commande)
+    graphisteRoleIds: ['1486487458299383838'],   // rôle(s) graphiste (optionnel)
+
+    // Permission Discord cochée sur le rôle staff pour VOIR les commandes staff (/panel, /commande…).
+    // Le rôle staff doit avoir "Gérer les salons" activé dans Discord → Paramètres du rôle.
+    staffSlashPermission: 'ManageChannels',
+    // Optionnel : permission cochée sur le rôle client pour voir /avis (sinon visible par tous).
+    // customerSlashPermission: 'AddReactions',
+
+    ticketCategoryIds: ['1487133793750876160'], // catégorie Support (salons ticket)
+
+    reviewValidationChannelId: '1522059840120295424', // staff valide les avis ici
+    reviewPublicChannelId: '1487131838131736708',         // avis validés publiés ici
+    orderChannelId: '1522060170824515775',                  // suivi des commandes + confirmations paiement
+    logChannelId: '1489248278569549864',                         // transcripts + logs internes
+
+    // Paiements (PayPal / Revolut)
+    payment: {
+      paypal: 'https://paypal.me/shiiirokhallass',
+      revolut: '@nshyy31',
+      validationChannelId: '1522059840120295424', // staff valide les paiements ici
+    },
+    // Paliers client selon le total dépensé (Partners exclu — manuel uniquement).
+    excludedAutoRoleIds: ['1505621396552683551'],
+    customerTiers: [
+      { minTotal: 300, roleId: '1521972792013099018', name: 'Exclusive' },
+      { minTotal: 150, roleId: '1521972731476967534', name: 'Elite' },
+      { minTotal: 50, roleId: '1521972622311559299', name: 'Customers Pro' },
+      { minTotal: 0, roleId: '1486487635751862362', name: 'Customers' },
+    ],
+  },
+
+  // ===== Serveur "Zforce" =====
+  '1520540847936901120': {
+    staffRoleIds: ['1520731633974771773'],
+    customerRoleId: '1521684687439790244',
+    graphisteRoleIds: ['1520546110899486900'],
+    staffSlashPermission: 'ManageChannels',
+
+    // Les nouveaux tickets sont créés dans la 1re catégorie de la liste.
+    // Les autres restent reconnues comme catégories de tickets (détection).
+    ticketCategoryIds: ['1521316198657163415', '1520729683279351890'],
+
+    reviewValidationChannelId: '1521685075782140127',
+    reviewPublicChannelId: '1520729242940346529',
+    orderChannelId: '1520728813749932153',
+    logChannelId: '1520732663152119908',
+  },
+};
+
+// --- RÉGLAGES COMMUNS (à tous les serveurs) --------------------------
+const shared = {
+  // Détection des tickets par préfixe de nom (en plus des catégories).
+  ticketNamePrefixes: ['ticket-', 'commande-', '🔴', '🟢'],
+
+  // Types de tickets proposés dans le panneau /panel (menu déroulant).
+  ticketTypes: [
+    { id: 'commande', label: 'Passer une commande', emoji: '🛒', description: 'Discuter d’une nouvelle commande graphique' },
+    { id: 'question', label: 'Question', emoji: '❓', description: 'Une question avant de commander' },
+    { id: 'sav', label: 'Réclamation / SAV', emoji: '⚠️', description: 'Un souci avec une prestation' },
+  ],
+
+  // Pastilles de statut des tickets (🔴/🟢 dans le nom du salon). false = désactivé.
+  pastillesEnabled: false,
+
+  // Pastilles de statut des tickets.
+  emoji: {
+    waiting: '🔴',  // en attente d'une réponse du staff (un membre a écrit)
+    answered: '🟢', // pris en charge (le staff a répondu)
+  },
+
+  // Relance : alerte le staff si un ticket reste "rouge" plus de X minutes. 0 = off.
+  relanceAfterMinutes: 60,
+
+  // Resync pastilles : verification chaque minute (nom Discord vs statut en base).
+  pastilleSyncIntervalSeconds: 60,
+  pastilleRenameDebounceMs: 0,
+
+  // Suivi de commande auto-rafraîchi pour le CLIENT :
+  //   - le bot re-poste l'embed de suivi et supprime l'ancien message,
+  //     pour que le client voie où en est sa commande, épinglé en bas.
+  //   TEST = 2 (minutes). PRODUCTION = 600 (soit 10 heures).
+  orderStatusRefreshMinutes: 2,
+
+  // Premiere install (Git / hebergeur) : prochaine /commande = initialOrderCounter + 1
+  initialOrderCounter: 24,
+
+  prefix: '+',                     // préfixe des commandes texte (ex : +commande)
+  brandColor: 0xff0038,            // couleur des embeds
+  currency: '€',                   // symbole monétaire pour les commandes
+  deleteTicketAfterCloseSeconds: 10, // délai avant suppression du salon après /close (0 = garder)
+
+  // Logs : true = affiche aussi les logs "debug" (verbeux) dans la console.
+  debugLogs: false,
+};
+
+// Valeurs par défaut si un serveur n'est pas (encore) configuré : évite les plantages.
+const guildDefaults = {
+  staffRoleIds: [], customerRoleId: '', graphisteRoleIds: [],
+  ticketCategoryIds: [], reviewValidationChannelId: '', reviewPublicChannelId: '',
+  orderChannelId: '', logChannelId: '',
+  payment: { paypal: '', revolut: '', validationChannelId: '' },
+  excludedAutoRoleIds: [],
+  customerTiers: [],
+  staffSlashPermission: 'ManageChannels',
+  customerSlashPermission: '',
+};
+
+/** Renvoie la config (rôles + salons) propre à un serveur donné. */
+function forGuild(guildId) {
+  return { ...guildDefaults, ...(guilds[guildId] || {}) };
+}
+
+module.exports = { ...shared, guilds, forGuild };

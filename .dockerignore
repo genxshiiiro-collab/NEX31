@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+!.env.example
+data/db.json
+.git
+_sim.js
+_watch.js
+*.bat
+.cursor
