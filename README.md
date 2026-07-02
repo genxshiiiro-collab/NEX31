@@ -152,3 +152,4 @@ discord-bot/
   supprime `data/db.json`.
 - Seul l'intent privilégié **Message Content** est requis (pour `+commande`). Le bot a aussi
   besoin de la permission **Manage Roles** pour l'autorole client.
+"# NEX31" 
