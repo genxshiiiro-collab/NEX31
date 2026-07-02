@@ -49,34 +49,18 @@ const guilds = {
   },
 
   // ===== Serveur "Zforce" =====
-  '1520540847936901120': {
-    staffRoleIds: ['1520731633974771773'],
-    customerRoleId: '1521684687439790244',
-    graphisteRoleIds: ['1520546110899486900'],
+  '1522263659672375396': {
+    staffRoleIds: ['1522265123811754044'],
+    customerRoleId: '1522265238144290986',
+    graphisteRoleIds: ['1522265123811754044'],
     staffSlashPermission: 'ManageChannels',
 
-    // Les nouveaux tickets sont créés dans la 1re catégorie de la liste.
-    // Les autres restent reconnues comme catégories de tickets (détection).
-    ticketCategoryIds: ['1521316198657163415', '1520729683279351890'],
+    ticketCategoryIds: ['1522264835268804699'],
 
-    reviewValidationChannelId: '1521685075782140127',
-    reviewPublicChannelId: '1520729242940346529',
+    reviewValidationChannelId: '1522266492094120129',
+    reviewPublicChannelId: '1522264785725558844',
     orderChannelId: '1520728813749932153',
-    logChannelId: '1520732663152119908',
-  },
-
-  // ===== Serveur supplémentaire =====
-  '1522265123811754044': {
-    staffRoleIds: ['1522265123811754044'], // rôle staff — commandes /panel, /commande, /setsuivi…
-    customerRoleId: '',
-    graphisteRoleIds: [],
-    staffSlashPermission: 'ManageChannels',
-
-    ticketCategoryIds: [],
-    reviewValidationChannelId: '',
-    reviewPublicChannelId: '',
-    orderChannelId: '',
-    logChannelId: '',
+    logChannelId: '1522264969226354759',
   },
 };
 
