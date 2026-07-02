@@ -43,7 +43,7 @@ async function handlePrefix(message) {
     clientId, clientTag: client.tag, prestation, prix, graphisteId,
   });
 
-  return message.reply(`✅ Commande **#${order.id}** créée pour <@${clientId}> — utilise **/setsuivi** dans le ticket pour afficher le suivi.`);
+  return message.reply(`✅ Commande **#${order.id}** créée pour <@${clientId}> — utilise **/setsuivi** pour afficher le suivi.`);
 }
 
 module.exports = { handlePrefix };

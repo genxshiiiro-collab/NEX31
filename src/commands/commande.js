@@ -178,7 +178,7 @@ async function execute(interaction) {
       graphisteId: interaction.options.getUser('graphiste')?.id || null,
     });
     return interaction.reply({
-      content: `✅ Commande **#${order.id}** créée. Utilise **/setsuivi** dans le ticket pour afficher le suivi.`,
+      content: `✅ Commande **#${order.id}** créée. Utilise **/setsuivi** pour afficher le suivi.`,
       flags: MessageFlags.Ephemeral,
     });
   }
