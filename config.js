@@ -101,6 +101,9 @@ const shared = {
   // Premiere install (Git / hebergeur) : prochaine /commande = initialOrderCounter + 1
   initialOrderCounter: 24,
 
+  // Enregistre les slash commands au demarrage du bot (YorkHost : pas besoin de npm run deploy a la main).
+  deployOnStartup: true,
+
   prefix: '+',                     // préfixe des commandes texte (ex : +commande)
   brandColor: 0xff0038,            // couleur des embeds
   currency: '€',                   // symbole monétaire pour les commandes
