@@ -28,7 +28,6 @@ const guilds = {
     ticketCategoryIds: ['1487133793750876160'], // catégorie Support (salons ticket)
 
     reviewValidationChannelId: '1522059840120295424', // staff valide les avis ici
-    reviewPublicChannelId: '1487131838131736708',         // avis validés publiés ici
     orderChannelId: '1522060170824515775',                  // suivi des commandes + confirmations paiement
     logChannelId: '1489248278569549864',                         // transcripts + logs internes
 
@@ -61,6 +60,12 @@ const guilds = {
     reviewPublicChannelId: '1522264785725558844',
     orderChannelId: '1520728813749932153',
     logChannelId: '1522264969226354759',
+
+    payment: {
+      paypal: 'https://paypal.me/ZforceGraph',
+      revolut: '',
+      validationChannelId: '1522266492094120129',
+    },
   },
 };
 
