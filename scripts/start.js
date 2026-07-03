@@ -12,10 +12,11 @@ function tryGitPull() {
     return;
   }
   try {
-    console.log('[NEX31] git pull origin main...');
-    execSync('git pull origin main', { cwd: ROOT, stdio: 'inherit' });
+    console.log('[NEX31] Sync GitHub (fetch + reset --hard origin/main)...');
+    execSync('git fetch origin main', { cwd: ROOT, stdio: 'inherit' });
+    execSync('git reset --hard origin/main', { cwd: ROOT, stdio: 'inherit' });
   } catch (err) {
-    console.warn('[NEX31] git pull echoue:', err.message || err);
+    console.warn('[NEX31] sync git echoue:', err.message || err);
   }
 }
 

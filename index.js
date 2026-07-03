@@ -1,17 +1,33 @@
-// Entree YorkHost / Pterodactyl — git pull + lance src/index.js
+// Entree YorkHost / Pterodactyl — sync GitHub + lance src/index.js
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const entry = path.join(__dirname, 'src', 'index.js');
+const ROOT = __dirname;
+const entry = path.join(ROOT, 'src', 'index.js');
 
-if (fs.existsSync(path.join(__dirname, '.git'))) {
-  try {
-    console.log('[NEX31] git pull origin main...');
-    execSync('git pull origin main', { cwd: __dirname, stdio: 'inherit' });
-  } catch (err) {
-    console.warn('[NEX31] git pull echoue:', err.message || err);
+function syncFromGitHub() {
+  if (!fs.existsSync(path.join(ROOT, '.git'))) {
+    console.log('[NEX31] Pas de .git — sync GitHub ignoree.');
+    return;
   }
+  try {
+    console.log('[NEX31] Sync GitHub (fetch + reset --hard origin/main)...');
+    execSync('git fetch origin main', { cwd: ROOT, stdio: 'inherit' });
+    execSync('git reset --hard origin/main', { cwd: ROOT, stdio: 'inherit' });
+    console.log('[NEX31] Code aligne sur GitHub.');
+  } catch (err) {
+    console.warn('[NEX31] Sync git echouee:', err.message || err);
+    console.warn('[NEX31] Lance manuellement : git fetch origin main && git reset --hard origin/main');
+  }
+}
+
+syncFromGitHub();
+
+// Recharge config.js apres sync (sinon cache Node = ancienne version).
+const configPath = path.join(ROOT, 'config.js');
+if (fs.existsSync(configPath)) {
+  delete require.cache[require.resolve(configPath)];
 }
 
 let build = '?';
@@ -30,7 +46,7 @@ if (!fs.existsSync(entry)) {
   console.error('');
   console.error('Contenu actuel du dossier :');
   try {
-    for (const name of fs.readdirSync(__dirname)) console.error(' -', name);
+    for (const name of fs.readdirSync(ROOT)) console.error(' -', name);
   } catch {
     console.error(' (impossible de lire le dossier)');
   }
