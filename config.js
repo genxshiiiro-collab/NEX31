@@ -110,22 +110,20 @@ const shared = {
   deployOnStartup: true,
 
   // Change a chaque push important — visible dans la console YorkHost au demarrage.
-  botBuild: '2026-07-03-COMPLET',
+  botBuild: '2026-07-03-COMPLET-v2',
 
   // Statut Discord rotatif (sous le nom du bot — change toutes les X secondes).
   presenceRotation: {
+    enabled: true,
+    startDelaySeconds: 5,
     intervalSeconds: 30,
     activities: [
       { name: '.gg/thirty1', type: 'Watching' },
       { name: 'Best graphics server : thirty1', type: 'Playing' },
-      { name: 'Logos • Bannières • Affiches', type: 'Watching' },
-      { name: 'ThirtyOne Lab\'s — design pro', type: 'Playing' },
-      { name: 'Rejoins-nous 👉 .gg/thirty1', type: 'Watching' },
-      { name: 'Créations graphiques sur mesure', type: 'Playing' },
-      { name: 'Premium visuals 🎨', type: 'Watching' },
+      { name: 'discord.gg/thirty1', type: 'Watching' },
+      { name: 'Logos • Bannières • Affiches', type: 'Playing' },
+      { name: 'ThirtyOne Lab\'s — design pro', type: 'Watching' },
       { name: '/panel pour commander', type: 'Playing' },
-      { name: 'Ton identité visuelle, notre passion', type: 'Watching' },
-      { name: 'discord.gg/thirty1', type: 'Playing' },
     ],
   },
 
