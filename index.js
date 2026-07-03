@@ -1,8 +1,27 @@
-// Entree YorkHost / Pterodactyl — lance le bot depuis src/index.js
+// Entree YorkHost / Pterodactyl — git pull + lance src/index.js
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const entry = path.join(__dirname, 'src', 'index.js');
+
+if (fs.existsSync(path.join(__dirname, '.git'))) {
+  try {
+    console.log('[NEX31] git pull origin main...');
+    execSync('git pull origin main', { cwd: __dirname, stdio: 'inherit' });
+  } catch (err) {
+    console.warn('[NEX31] git pull echoue:', err.message || err);
+  }
+}
+
+let build = '?';
+try {
+  build = require('./config').botBuild || '?';
+} catch { /* config pas encore la */ }
+
+console.log('========================================');
+console.log(`[NEX31] Build ${build} — statut rotatif .gg/thirty1`);
+console.log('========================================');
 
 if (!fs.existsSync(entry)) {
   console.error('');
@@ -16,10 +35,7 @@ if (!fs.existsSync(entry)) {
     console.error(' (impossible de lire le dossier)');
   }
   console.error('');
-  console.error('Solution :');
-  console.error(' 1) SFTP : uploade le CONTENU de deploy/yorkhost/ (pas le dossier parent)');
-  console.error(' 2) Ou desactive GIT_ADDRESS dans le panel si tu upload a la main');
-  console.error(' 3) Ou change la commande de demarrage en : node src/index.js');
+  console.error('Solution : GIT_ADDRESS = https://github.com/genxshiiiro-collab/NEX31.git');
   console.error('');
   process.exit(1);
 }
