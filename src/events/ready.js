@@ -1,9 +1,10 @@
-const { ActivityType, Events } = require('discord.js');
+const { Events } = require('discord.js');
 const log = require('../lib/logger');
 const { importAndPublishLegacyReviews } = require('../lib/reviewStats');
 const { syncAllOpen, cleanupLegacyStatusMessages } = require('../lib/ticketPastille');
 const { db, save } = require('../storage');
 const config = require('../../config');
+const { startPresenceRotation } = require('../lib/presence');
 const { deployCommands } = require('../lib/deployCommands');
 
 /** Relance le staff sur les tickets restés "rouge" trop longtemps. */
@@ -36,7 +37,7 @@ module.exports = {
   execute(client) {
     log.attach(client);
     log.success('bot', `Connecté en tant que ${client.user.tag}`, { serveurs: client.guilds.cache.size });
-    client.user.setActivity('vos clients 🎨', { type: ActivityType.Watching });
+    startPresenceRotation(client);
 
     if (config.deployOnStartup !== false) {
       const memberOf = [...client.guilds.cache.keys()];

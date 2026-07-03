@@ -109,6 +109,23 @@ const shared = {
   // Enregistre les slash commands au demarrage du bot (YorkHost : pas besoin de npm run deploy a la main).
   deployOnStartup: true,
 
+  // Statut Discord rotatif (sous le nom du bot — change toutes les X secondes).
+  presenceRotation: {
+    intervalSeconds: 45,
+    activities: [
+      { name: '.gg/thirty1', type: 'Watching' },
+      { name: 'Best graphics server : thirty1', type: 'Playing' },
+      { name: 'Logos • Bannières • Affiches', type: 'Watching' },
+      { name: 'ThirtyOne Lab\'s — design pro', type: 'Playing' },
+      { name: 'Rejoins-nous 👉 .gg/thirty1', type: 'Watching' },
+      { name: 'Créations graphiques sur mesure', type: 'Playing' },
+      { name: 'Premium visuals 🎨', type: 'Watching' },
+      { name: '/panel pour commander', type: 'Playing' },
+      { name: 'Ton identité visuelle, notre passion', type: 'Watching' },
+      { name: 'discord.gg/thirty1', type: 'Playing' },
+    ],
+  },
+
   prefix: '+',                     // préfixe des commandes texte (ex : +commande)
   brandColor: 0xff0038,            // couleur des embeds
   currency: '€',                   // symbole monétaire pour les commandes
