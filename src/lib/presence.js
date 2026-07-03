@@ -50,6 +50,7 @@ function startPresenceRotation(client) {
       activities: [{ name: current.name, type: current.type }],
       status: 'online',
     }).catch((err) => log.warn('presence', 'Mise a jour statut', { detail: err.message }));
+    console.log(`[presence] ${current.type === ActivityType.Playing ? 'Joue a' : 'Regarde'} ${current.name}`);
   };
 
   tick();

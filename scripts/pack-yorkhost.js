@@ -16,7 +16,7 @@ const COPY_FILES = [
   'ecosystem.config.js',
 ];
 
-const COPY_DIRS = ['src'];
+const COPY_DIRS = ['src', 'scripts'];
 
 const SKIP_IN_SRC = new Set(['scripts']); // outils dev locaux
 

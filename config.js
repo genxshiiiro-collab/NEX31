@@ -109,9 +109,12 @@ const shared = {
   // Enregistre les slash commands au demarrage du bot (YorkHost : pas besoin de npm run deploy a la main).
   deployOnStartup: true,
 
+  // Change a chaque push important — visible dans la console YorkHost au demarrage.
+  botBuild: '2026-07-03-presence',
+
   // Statut Discord rotatif (sous le nom du bot — change toutes les X secondes).
   presenceRotation: {
-    intervalSeconds: 45,
+    intervalSeconds: 30,
     activities: [
       { name: '.gg/thirty1', type: 'Watching' },
       { name: 'Best graphics server : thirty1', type: 'Playing' },
