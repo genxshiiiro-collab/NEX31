@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Genere deploy/yorkhost/ — dossier pret a uploader sur YorkHost (SFTP ou drag & drop).
+// Genere deploy/yorkhost/ — dossier pret a remplacer sur YorkHost.
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'deploy', 'yorkhost');
+const ZIP = path.join(ROOT, 'deploy', 'YORKHOST-REMPLACER.zip');
 
 const COPY_FILES = [
   'index.js',
@@ -16,9 +18,8 @@ const COPY_FILES = [
   'ecosystem.config.js',
 ];
 
-const COPY_DIRS = ['src', 'scripts'];
-
-const SKIP_IN_SRC = new Set(['scripts']); // outils dev locaux
+const SKIP_IN_SRC = new Set(['scripts']);
+const SKIP_IN_SCRIPTS = new Set(['pack-yorkhost.js']);
 
 function rimraf(dir) {
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
@@ -29,16 +30,31 @@ function copyFile(src, dest) {
   fs.copyFileSync(src, dest);
 }
 
-function copyDir(srcDir, destDir, skipDirs = new Set()) {
+function copyDir(srcDir, destDir, skipNames = new Set()) {
   fs.mkdirSync(destDir, { recursive: true });
   for (const name of fs.readdirSync(srcDir)) {
-    if (skipDirs.has(name)) continue;
+    if (skipNames.has(name)) continue;
     const src = path.join(srcDir, name);
     const dest = path.join(destDir, name);
-    if (fs.statSync(src).isDirectory()) copyDir(src, dest, skipDirs);
+    if (fs.statSync(src).isDirectory()) copyDir(src, dest, skipNames);
     else copyFile(src, dest);
   }
 }
+
+function copyScriptsDir() {
+  const srcDir = path.join(ROOT, 'scripts');
+  const destDir = path.join(OUT, 'scripts');
+  fs.mkdirSync(destDir, { recursive: true });
+  for (const name of fs.readdirSync(srcDir)) {
+    if (SKIP_IN_SCRIPTS.has(name)) continue;
+    copyFile(path.join(srcDir, name), path.join(destDir, name));
+  }
+}
+
+let build = '?';
+try {
+  build = require(path.join(ROOT, 'config')).botBuild || '?';
+} catch { /* ignore */ }
 
 const DEFAULT_DB = {
   tickets: {},
@@ -52,72 +68,53 @@ const DEFAULT_DB = {
   counters: { review: 0, order: 24, payment: 0 },
 };
 
-const LISEZMOI = `# ThirtyOne Lab's Bot — YorkHost (drag & drop)
+const LISEZMOI = `# NEX31 Bot — Remplacement manuel YorkHost
+Build : ${build}
+Genere : ${new Date().toISOString()}
 
-## ERREUR "Cannot find module index.js" ?
+## Contenu de CE build (${build})
 
-Ca veut dire que les fichiers ne sont PAS a la racine du serveur.
-YorkHost cherche : /home/container/index.js
+[x] Bio rotatif .gg/thirty1 (change toutes les 30s)
+[x] /livrer avec fichier OU lien
+[x] /setsuivi hors ticket
+[x] Zforce configure (serveur 1522263659672375396)
+[x] PayPal Zforce @ZforceGraph
+[x] Deploy auto des commandes au demarrage
 
----
+## Etapes (upload manuel)
 
-## Methode A — Upload manuel (recommande)
+1. YorkHost → VIDE la variable GIT_ADDRESS (sinon Git ecrase tes fichiers)
 
-1. Panel YorkHost → Files (SFTP) → ouvre /home/container/
-2. SUPPRIME tout le contenu actuel (ancien essai)
-3. Upload TOUT le contenu de CE dossier (index.js, src/, package.json…)
-   ⚠️ PAS le dossier "yorkhost" lui-meme — ouvre le zip et mets les fichiers directement a la racine
-4. Console → tape : ls -la
-   Tu dois voir : index.js   package.json   src/
-5. Si tu vois seulement "yorkhost/" comme dossier → mauvais upload, refais etape 3
+2. Files → /home/container/
+   - GARDE le fichier .env (ne le supprime pas !)
+   - GARDE data/db.json si tu veux conserver commandes/tickets
+   - Supprime le reste (index.js, src/, config.js, node_modules…)
 
-## Methode B — Git configure dans YorkHost
+3. Upload TOUT le CONTENU de ce dossier a la racine /home/container/
+   (index.js, config.js, src/, package.json… PAS le dossier parent)
 
-Si GIT_ADDRESS est rempli dans Variables, YorkHost ignore ton upload et pull GitHub.
-→ Soit push ce projet (avec index.js) sur le repo Git
-→ Soit VIDE la variable GIT_ADDRESS et utilise la methode A
+4. Startup : node index.js
 
-## Variables (onglet Variables)
+5. Restart le serveur
+
+6. Console : tu dois voir EXACTEMENT :
+   [NEX31] Build ${build}
+
+   Si tu vois "2026-07-03-presence" ou autre → mauvaise version, refais etape 2-3
+
+## .env (a garder sur le serveur)
 
 DISCORD_TOKEN=ton_token
 CLIENT_ID=1521667381251014706
-GUILD_ID=1486375983434174516,1520540847936901120
+GUILD_ID=1486375983434174516,1522263659672375396
 
-## Commande de demarrage (onglet Startup)
+## Nouveautes de ce build
 
-Choisis UNE de ces commandes :
-
-    node index.js
-
-ou
-
-    node src/index.js
-
-ou
-
-    npm start
-
-## Premier lancement
-
-1. Demarre → attends "Connecte en tant que..."
-2. Console : npm run deploy
-3. Redemarre
-
-Prochaine commande client : #25
-`;
-
-const STARTUP = `node src/index.js
-`;
-
-const VERIF = `Fichiers requis a la racine /home/container/ :
-  index.js
-  server.js
-  package.json
-  config.js
-  src/index.js
-  data/db.json
-
-Genere le : ${new Date().toISOString()}
+- Statut rotatif .gg/thirty1
+- /livrer avec fichier OU lien
+- /setsuivi hors ticket (staff)
+- Paiements Zforce PayPal @ZforceGraph
+- Deploy auto des commandes au demarrage
 `;
 
 rimraf(OUT);
@@ -132,23 +129,34 @@ for (const f of COPY_FILES) {
   copyFile(src, path.join(OUT, f));
 }
 
-for (const d of COPY_DIRS) {
-  copyDir(path.join(ROOT, d), path.join(OUT, d), SKIP_IN_SRC);
-}
+copyDir(path.join(ROOT, 'src'), path.join(OUT, 'src'), SKIP_IN_SRC);
+copyScriptsDir();
 
 fs.mkdirSync(path.join(OUT, 'data'), { recursive: true });
-fs.writeFileSync(path.join(OUT, 'data', 'db.json'), `${JSON.stringify(DEFAULT_DB, null, 2)}\n`);
+if (!fs.existsSync(path.join(OUT, 'data', 'db.json'))) {
+  fs.writeFileSync(path.join(OUT, 'data', 'db.json'), `${JSON.stringify(DEFAULT_DB, null, 2)}\n`);
+}
 
 copyFile(path.join(ROOT, '.env.example'), path.join(OUT, '.env.example'));
 fs.writeFileSync(path.join(OUT, 'LISEZMOI-YORKHOST.txt'), LISEZMOI);
-fs.writeFileSync(path.join(OUT, 'COMMANDE-DEMARRAGE.txt'), STARTUP);
-fs.writeFileSync(path.join(OUT, '_VERIF-FICHIERS.txt'), VERIF);
+fs.writeFileSync(path.join(OUT, 'VERSION.txt'), `Build: ${build}\nGenere: ${new Date().toISOString()}\n\nBio rotatif + /livrer lien + Zforce + deploy auto\n`);
 
-const zipPath = path.join(ROOT, 'deploy', 'YORKHOST-UPLOAD.zip');
+try { fs.rmSync(ZIP, { force: true }); } catch { /* ignore */ }
 try {
-  fs.rmSync(zipPath, { force: true });
-} catch { /* ignore */ }
+  if (process.platform === 'win32') {
+    execSync(
+      `powershell -NoProfile -Command "Compress-Archive -Path '${OUT.replace(/'/g, "''")}\\*' -DestinationPath '${ZIP.replace(/'/g, "''")}' -Force"`,
+      { stdio: 'inherit' },
+    );
+  }
+} catch (err) {
+  console.warn('Zip non cree:', err.message);
+}
 
-console.log(`\nOK — dossier pret : ${OUT}`);
-console.log('Upload le CONTENU de ce dossier a /home/container/ sur YorkHost.');
-console.log('Lis LISEZMOI-YORKHOST.txt si index.js introuvable.\n');
+console.log('');
+console.log('OK — dossier pret :');
+console.log(' ', OUT);
+if (fs.existsSync(ZIP)) console.log('OK — zip pret :', ZIP);
+console.log('');
+console.log('Remplace le contenu de /home/container/ sur YorkHost (garde .env).');
+console.log('');
