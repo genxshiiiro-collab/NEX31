@@ -110,7 +110,7 @@ const shared = {
   deployOnStartup: true,
 
   // Change a chaque push important — visible dans la console YorkHost au demarrage.
-  botBuild: '2026-07-03-gitfix',
+  botBuild: '2026-07-03-livrer-lien',
 
   // Statut Discord rotatif (sous le nom du bot — change toutes les X secondes).
   presenceRotation: {
