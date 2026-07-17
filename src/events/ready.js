@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const log = require('../lib/logger');
-const { importAndPublishLegacyReviews } = require('../lib/reviewStats');
+const { importAndPublishLegacyReviews, publishApprovedBotReviews } = require('../lib/reviewStats');
 const { syncAllOpen, cleanupLegacyStatusMessages } = require('../lib/ticketPastille');
 const { db, save } = require('../storage');
 const config = require('../../config');
@@ -46,6 +46,7 @@ module.exports = {
     }
 
     importAndPublishLegacyReviews(client).catch((e) => log.error('avis', 'Import/publication avis historiques', e));
+    publishApprovedBotReviews(client).catch((e) => log.error('avis', 'Publication avis approuvés non postés', e));
 
     cleanupLegacyStatusMessages(client).catch((e) => log.error('pastille', 'Nettoyage bandeaux', e));
     if (config.pastillesEnabled !== false) {

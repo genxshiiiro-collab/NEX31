@@ -10,6 +10,7 @@ const { PermissionFlagsBits } = require('discord.js');
 const ACCESS = {
   stats: 'public',
   payer: 'public',
+  procedure: 'staff',
   avis: 'customer',
   panel: 'staff',
   commande: 'staff',

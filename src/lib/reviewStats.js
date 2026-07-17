@@ -237,6 +237,83 @@ async function importAndPublishLegacyReviews(client) {
   return publishLegacyReviewsToChannel(client);
 }
 
+/**
+ * Filet de sécurité : publie les avis "bot" (db.reviews) approuvés mais jamais
+ * postés dans le salon public (ex. approuvés quand reviewPublicChannelId n'était
+ * pas encore configuré). Réconciliation anti-doublon sur "Avis #<id>".
+ */
+async function publishApprovedBotReviews(client) {
+  if (!db.reviews) return 0;
+
+  const pending = Object.values(db.reviews)
+    .filter((r) => r.status === 'approved' && !r.publishedMessageId)
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  if (!pending.length) return 0;
+
+  let published = 0;
+  const seenByChannel = new Map(); // channelId -> Map(reviewId -> messageId)
+
+  for (const review of pending) {
+    const channelId = config.forGuild(review.guildId).reviewPublicChannelId;
+    if (!channelId || String(channelId).startsWith('ID_')) continue;
+
+    const channel = await client.channels.fetch(channelId).catch(() => null);
+    if (!channel?.send) continue;
+
+    // Réconciliation : repère les avis déjà publiés (messages bot "Avis #<id>").
+    if (!seenByChannel.has(channelId)) {
+      const seen = new Map();
+      const batch = await channel.messages.fetch({ limit: 100 }).catch(() => null);
+      if (batch) {
+        for (const msg of batch.values()) {
+          if (!msg.author?.bot) continue;
+          let raw = '';
+          try { raw = JSON.stringify(msg.components ?? []); } catch { continue; }
+          for (const tag of raw.match(/Avis #(\d+)/g) || []) {
+            seen.set(tag.replace('Avis #', ''), msg.id);
+          }
+        }
+      }
+      seenByChannel.set(channelId, seen);
+    }
+    const seen = seenByChannel.get(channelId);
+
+    if (seen.has(String(review.id))) {
+      review.publishedMessageId = seen.get(String(review.id));
+      review.publishedAt = review.publishedAt || Date.now();
+      save();
+      continue;
+    }
+
+    let avatar = null;
+    if (review.authorId) {
+      const user = await client.users.fetch(review.authorId).catch(() => null);
+      avatar = user?.displayAvatarURL?.() || null;
+    }
+    try {
+      const msg = await channel.send({
+        components: [publicContainer(review, avatar)],
+        flags: V2,
+        allowedMentions: { parse: [] },
+      });
+      review.publishedMessageId = msg.id;
+      review.publishedAt = Date.now();
+      seen.set(String(review.id), msg.id);
+      published += 1;
+      save();
+      await sleep(800);
+    } catch (err) {
+      log.error('avis', `Publication avis bot #${review.id} impossible`, err);
+    }
+  }
+
+  if (published) {
+    persistNow();
+    log.success('avis', `${published} avis bot publié(s) dans le salon public`);
+  }
+  return published;
+}
+
 function getApprovedReviews(guildId) {
   ensureLegacySeeds();
   const bot = Object.values(db.reviews || {})
@@ -274,6 +351,7 @@ module.exports = {
   syncLegacyReviewsFromChannels,
   publishLegacyReviewsToChannel,
   importAndPublishLegacyReviews,
+  publishApprovedBotReviews,
   getApprovedReviews,
   getPendingReviews,
   averageNote,

@@ -26,8 +26,14 @@ async function createTicket(interaction, typeId) {
   const user = interaction.user;
   const type = config.ticketTypes.find((t) => t.id === typeId) || { id: 'ticket', label: 'Ticket', emoji: '🎫' };
 
+  // Ack immédiat : la création d'un salon peut dépasser les 3 s autorisées par
+  // Discord (sinon 10062 Unknown interaction / 40060 already acknowledged).
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {});
+  }
+
   if (isBlacklisted(guild.id, user.id)) {
-    return interaction.reply({ content: '🚫 Tu ne peux pas ouvrir de ticket.', flags: MessageFlags.Ephemeral });
+    return interaction.editReply({ content: '🚫 Tu ne peux pas ouvrir de ticket.' });
   }
 
   // Empêche les doublons : un seul ticket ouvert par personne (sur ce serveur).
@@ -35,7 +41,7 @@ async function createTicket(interaction, typeId) {
   if (already) {
     const existing = guild.channels.cache.get(already[0]) || await guild.channels.fetch(already[0]).catch(() => null);
     if (existing) {
-      return interaction.reply({ content: `❗ Tu as déjà un ticket ouvert : ${existing}`, flags: MessageFlags.Ephemeral });
+      return interaction.editReply({ content: `❗ Tu as déjà un ticket ouvert : ${existing}` });
     }
     delete db.tickets[already[0]]; // salon supprimé entre-temps : on nettoie
   }
@@ -84,9 +90,8 @@ async function createTicket(interaction, typeId) {
     });
   } catch (err) {
     console.error('[ticket] Création impossible :', err.message);
-    return interaction.reply({
+    return interaction.editReply({
       content: '⚠️ Impossible de créer le salon. Vérifie que le bot a la permission **Gérer les salons** et que la catégorie de tickets est bien configurée.',
-      flags: MessageFlags.Ephemeral,
     });
   }
 
@@ -125,7 +130,7 @@ async function createTicket(interaction, typeId) {
     ],
   });
 
-  return interaction.reply({ content: `✅ Ton ticket a été créé : ${channel}`, flags: MessageFlags.Ephemeral });
+  return interaction.editReply({ content: `✅ Ton ticket a été créé : ${channel}` });
 }
 
 async function buildTranscript(channel) {

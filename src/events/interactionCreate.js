@@ -59,13 +59,21 @@ async function handleAvisButton(interaction, action, id) {
     const avatar = author?.displayAvatarURL();
 
     const publicChannelId = config.forGuild(interaction.guild.id).reviewPublicChannelId;
-    const publicChannel = publicChannelId ? await interaction.guild.channels.fetch(publicChannelId).catch(() => null) : null;
-    if (publicChannel) {
-      await publicChannel.send({
+    // Résolution globale (client) : le salon d'avis peut ne pas être dans le cache
+    // du guild de l'interaction → guild.channels.fetch renverrait null.
+    const publicChannel = publicChannelId
+      ? await interaction.client.channels.fetch(publicChannelId).catch(() => null)
+      : null;
+    if (publicChannel?.send) {
+      const publicMsg = await publicChannel.send({
         components: [publicContainer(review, avatar)],
         flags: V2,
         allowedMentions: { parse: [] },
       });
+      // Mémorise la publication → évite un re-post au prochain démarrage.
+      review.publishedMessageId = publicMsg.id;
+      review.publishedAt = Date.now();
+      save();
     }
 
     await interaction.update({ components: [validationContainer(review, avatar)], flags: V2 });

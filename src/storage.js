@@ -54,6 +54,16 @@ function load() {
     for (const k of Object.keys(DEFAULT_DB)) {
       if (fresh[k] === undefined) fresh[k] = structuredClone(DEFAULT_DB[k]);
     }
+    // Plancher du numéro de commande : la prochaine /commande sera au minimum ce
+    // numéro. Appliqué à CHAQUE démarrage (même sur une base existante), donc
+    // valable "à partir de maintenant". Ne fait jamais reculer un compteur déjà plus haut.
+    const orderFloor = require('../config').orderNumberFloor;
+    if (orderFloor > 0) {
+      if (!fresh.counters) fresh.counters = structuredClone(DEFAULT_DB.counters);
+      if ((fresh.counters.order || 0) < orderFloor - 1) {
+        fresh.counters.order = orderFloor - 1;
+      }
+    }
     // Réassigner les clés sur l'objet exporté (module.exports.db) — ne pas remplacer la référence.
     for (const key of Object.keys(db)) delete db[key];
     Object.assign(db, fresh);

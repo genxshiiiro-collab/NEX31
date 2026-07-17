@@ -28,6 +28,7 @@ const guilds = {
     ticketCategoryIds: ['1487133793750876160'], // catégorie Support (salons ticket)
 
     reviewValidationChannelId: '1522059840120295424', // staff valide les avis ici
+    reviewPublicChannelId: '1487131838131736708',    // avis publiés (après validation staff)
     orderChannelId: '1522060170824515775',                  // suivi des commandes + confirmations paiement
     logChannelId: '1489248278569549864',                         // transcripts + logs internes
 
@@ -106,11 +107,16 @@ const shared = {
   // Premiere install (Git / hebergeur) : prochaine /commande = initialOrderCounter + 1
   initialOrderCounter: 24,
 
+  // Plancher du numero de commande : la prochaine /commande sera AU MINIMUM ce numero.
+  // Applique a chaque demarrage (meme sur une base existante) — "a partir de maintenant".
+  // Ne fait jamais reculer un compteur deja plus haut. 0 = desactive.
+  orderNumberFloor: 40,
+
   // Enregistre les slash commands au demarrage du bot (YorkHost : pas besoin de npm run deploy a la main).
   deployOnStartup: true,
 
   // Change a chaque push important — visible dans la console YorkHost au demarrage.
-  botBuild: '2026-07-03-COMPLET-v2',
+  botBuild: '2026-07-17-procedure-orderfloor',
 
   // Statut Discord rotatif (sous le nom du bot — change toutes les X secondes).
   presenceRotation: {
@@ -119,11 +125,52 @@ const shared = {
     intervalSeconds: 30,
     activities: [
       { name: '.gg/thirty1', type: 'Watching' },
-      { name: 'Best graphics server : thirty1', type: 'Playing' },
       { name: 'discord.gg/thirty1', type: 'Watching' },
+      { name: 'thirtyOne Studio', type: 'Watching' },
+      { name: 'thirtyOne Creative Lab', type: 'Watching' },
+
+      { name: 'Best graphics server : thirtyOne', type: 'Playing' },
+      { name: 'Premium Branding', type: 'Playing' },
+      { name: 'Visual Identity', type: 'Playing' },
+      { name: 'Creative Direction', type: 'Playing' },
+      { name: 'Motion Design', type: 'Playing' },
+      { name: 'Graphic Design', type: 'Playing' },
+      { name: 'UI / UX Design', type: 'Playing' },
+      { name: 'FiveM Branding', type: 'Playing' },
+      { name: 'Discord Branding', type: 'Playing' },
+
       { name: 'Logos • Bannières • Affiches', type: 'Playing' },
-      { name: 'ThirtyOne Lab\'s — design pro', type: 'Watching' },
-      { name: '/panel pour commander', type: 'Playing' },
+      { name: 'Loading Screens', type: 'Playing' },
+      { name: 'UI • HUD • Interfaces', type: 'Playing' },
+      { name: 'Animated Visuals', type: 'Playing' },
+      { name: 'Brand Identity', type: 'Playing' },
+
+      { name: 'Designing premium brands', type: 'Playing' },
+      { name: 'Creating visual identities', type: 'Playing' },
+      { name: 'Building your project', type: 'Playing' },
+      { name: 'Turning ideas into visuals', type: 'Playing' },
+
+      { name: 'Open commissions', type: 'Watching' },
+      { name: 'Client projects', type: 'Watching' },
+      { name: 'New creations', type: 'Watching' },
+      { name: 'Creative process', type: 'Watching' },
+      { name: 'Premium portfolios', type: 'Watching' },
+
+      { name: 'Photoshop', type: 'Playing' },
+      { name: 'After Effects', type: 'Playing' },
+      { name: 'Illustrator', type: 'Playing' },
+      { name: 'Figma', type: 'Playing' },
+
+      { name: '48h de délais', type: 'Playing' },
+      { name: 'Commandes ouvertes', type: 'Watching' },
+      { name: 'Support disponible', type: 'Watching' },
+      { name: 'Qualité avant quantité', type: 'Playing' },
+      { name: 'Chaque pixel compte', type: 'Playing' },
+      { name: 'Design Beyond Limits', type: 'Playing' },
+      { name: 'Where Brands Begin', type: 'Playing' },
+      { name: 'Identity First', type: 'Playing' },
+      { name: 'Made by thirtyOne', type: 'Watching' },
+      { name: 'Your next branding', type: 'Watching' },
     ],
   },
 

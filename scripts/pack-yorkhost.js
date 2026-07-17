@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// Genere deploy/yorkhost/ — dossier pret a remplacer sur YorkHost.
+// Genere deploy/GLISSER-SUR-YORKHOST/ — glisser le contenu sur YorkHost.
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
-const OUT = path.join(ROOT, 'deploy', 'yorkhost');
-const ZIP = path.join(ROOT, 'deploy', 'YORKHOST-REMPLACER.zip');
+const OUT = path.join(ROOT, 'deploy', 'GLISSER-SUR-YORKHOST');
+const ZIP = path.join(ROOT, 'deploy', 'GLISSER-SUR-YORKHOST.zip');
 
 const COPY_FILES = [
   'index.js',
@@ -56,65 +56,45 @@ try {
   build = require(path.join(ROOT, 'config')).botBuild || '?';
 } catch { /* ignore */ }
 
-const DEFAULT_DB = {
-  tickets: {},
-  reviews: {},
-  orders: {},
-  blacklist: {},
-  panels: {},
-  legacyReviews: {},
-  payments: {},
-  clientTotals: {},
-  counters: { review: 0, order: 24, payment: 0 },
-};
-
-const LISEZMOI = `# NEX31 Bot — Remplacement manuel YorkHost
+const LISEMOI = `NEX31 — GLISSER SUR YORKHOST (upload manuel)
 Build : ${build}
-Genere : ${new Date().toISOString()}
+Genere : ${new Date().toLocaleString('fr-FR')}
 
-## Contenu de CE build (${build})
+=== IMPORTANT (les 2 causes de crash) ===
+- La variable GIT_ADDRESS doit etre VIDE (sinon YorkHost tente un clone Git
+  au lieu de lancer tes fichiers -> "Cannot find module index.js").
+- index.js doit finir A LA RACINE /home/container/index.js
+  (PAS dans un sous-dossier comme /home/container/GLISSER-SUR-YORKHOST/).
 
-[x] Bio rotatif .gg/thirty1 (change toutes les 30s)
-[x] /livrer avec fichier OU lien
-[x] /setsuivi hors ticket
-[x] Zforce configure (serveur 1522263659672375396)
-[x] PayPal Zforce @ZforceGraph
-[x] Deploy auto des commandes au demarrage
+=== ETAPES ===
 
-## Etapes (upload manuel)
+1. YorkHost → Startup : laisse GIT_ADDRESS VIDE. Fichier de demarrage = index.js
 
-1. YorkHost → VIDE la variable GIT_ADDRESS (sinon Git ecrase tes fichiers)
+2. YorkHost → Files → /home/container/
 
-2. Files → /home/container/
-   - GARDE le fichier .env (ne le supprime pas !)
-   - GARDE data/db.json si tu veux conserver commandes/tickets
-   - Supprime le reste (index.js, src/, config.js, node_modules…)
+3. GARDE ces fichiers/dossiers (ne les supprime PAS) :
+   - .env               (ton token)
+   - data/              (db.json : commandes, tickets, compteurs)
+   - node_modules/      (dependances deja installees)
 
-3. Upload TOUT le CONTENU de ce dossier a la racine /home/container/
-   (index.js, config.js, src/, package.json… PAS le dossier parent)
+4. Remplace le CODE (tu peux ecraser) :
+   index.js, config.js, src/, package.json, package-lock.json...
+   -> Uploade le CONTENU de ce dossier (pas le dossier lui-meme) dans /home/container/
 
-4. Startup : node index.js
+5. Verifie : /home/container/index.js et /home/container/src/ existent bien a la racine
 
-5. Restart le serveur
+6. Restart le serveur
 
-6. Console : tu dois voir EXACTEMENT :
-   [NEX31] Build ${build}
+=== CONSOLE OK ===
 
-   Si tu vois "2026-07-03-presence" ou autre → mauvaise version, refais etape 2-3
+[NEX31] Build ${build}
+[NEX31] Pas de .git — sync GitHub ignoree.
+Deploy termine : 2/2 serveur(s) OK
 
-## .env (a garder sur le serveur)
+Si erreur "Cannot find module 'discord.js'" : node_modules absent.
+-> Reinstall le serveur, ou console : npm install
 
-DISCORD_TOKEN=ton_token
-CLIENT_ID=1521667381251014706
-GUILD_ID=1486375983434174516,1522263659672375396
-
-## Nouveautes de ce build
-
-- Statut rotatif .gg/thirty1
-- /livrer avec fichier OU lien
-- /setsuivi hors ticket (staff)
-- Paiements Zforce PayPal @ZforceGraph
-- Deploy auto des commandes au demarrage
+Startup YorkHost : node index.js
 `;
 
 rimraf(OUT);
@@ -132,14 +112,9 @@ for (const f of COPY_FILES) {
 copyDir(path.join(ROOT, 'src'), path.join(OUT, 'src'), SKIP_IN_SRC);
 copyScriptsDir();
 
-fs.mkdirSync(path.join(OUT, 'data'), { recursive: true });
-if (!fs.existsSync(path.join(OUT, 'data', 'db.json'))) {
-  fs.writeFileSync(path.join(OUT, 'data', 'db.json'), `${JSON.stringify(DEFAULT_DB, null, 2)}\n`);
-}
-
 copyFile(path.join(ROOT, '.env.example'), path.join(OUT, '.env.example'));
-fs.writeFileSync(path.join(OUT, 'LISEZMOI-YORKHOST.txt'), LISEZMOI);
-fs.writeFileSync(path.join(OUT, 'VERSION.txt'), `Build: ${build}\nGenere: ${new Date().toISOString()}\n\nBio rotatif + /livrer lien + Zforce + deploy auto\n`);
+fs.writeFileSync(path.join(OUT, '!!! LISE-MOI.txt'), LISEMOI);
+fs.writeFileSync(path.join(OUT, 'VERSION.txt'), `${build}\n${new Date().toISOString()}\n`);
 
 try { fs.rmSync(ZIP, { force: true }); } catch { /* ignore */ }
 try {
@@ -154,9 +129,10 @@ try {
 }
 
 console.log('');
-console.log('OK — dossier pret :');
+console.log('========================================');
+console.log('  DOSSIER PRET — glisse sur YorkHost :');
 console.log(' ', OUT);
-if (fs.existsSync(ZIP)) console.log('OK — zip pret :', ZIP);
-console.log('');
-console.log('Remplace le contenu de /home/container/ sur YorkHost (garde .env).');
+if (fs.existsSync(ZIP)) console.log('  (ou zip :', ZIP + ')');
+console.log('========================================');
+console.log('Garde .env et data/db.json sur le serveur.');
 console.log('');

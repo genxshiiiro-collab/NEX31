@@ -84,13 +84,18 @@ const data = new SlashCommandBuilder()
     o.setName('commentaire').setDescription('Ton retour détaillé').setRequired(true).setMaxLength(900));
 
 async function execute(interaction) {
+  // Ack immédiat : l'envoi vers le salon de validation peut dépasser les 3 s
+  // autorisées par Discord (sinon 10062 Unknown interaction).
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {});
+  }
+
   if (isBlacklisted(interaction.guild.id, interaction.user.id)) {
-    return interaction.reply({ content: '🚫 Tu ne peux pas laisser d\'avis.', flags: MessageFlags.Ephemeral });
+    return interaction.editReply({ content: '🚫 Tu ne peux pas laisser d\'avis.' });
   }
   if (!isCustomer(interaction.member)) {
-    return interaction.reply({
+    return interaction.editReply({
       content: '❌ Seuls les membres avec le rôle **client** peuvent laisser un avis.',
-      flags: MessageFlags.Ephemeral,
     });
   }
 
@@ -99,9 +104,8 @@ async function execute(interaction) {
     ? await interaction.guild.channels.fetch(validationChannelId).catch(() => null)
     : null;
   if (!validationChannel) {
-    return interaction.reply({
+    return interaction.editReply({
       content: '⚠️ Salon de validation des avis introuvable. Préviens un admin (config `reviewValidationChannelId`).',
-      flags: MessageFlags.Ephemeral,
     });
   }
 
@@ -137,9 +141,8 @@ async function execute(interaction) {
     ],
   });
 
-  return interaction.reply({
+  return interaction.editReply({
     content: '✅ Merci ! Ton avis a bien été envoyé. Il sera publié après validation par le staff.',
-    flags: MessageFlags.Ephemeral,
   });
 }
 

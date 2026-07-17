@@ -12,12 +12,52 @@ const TYPE_MAP = {
 
 function defaultActivities() {
   return [
+    // — Marque / invitation
     { name: '.gg/thirty1', type: 'Watching' },
-    { name: 'Best graphics server : thirty1', type: 'Playing' },
     { name: 'discord.gg/thirty1', type: 'Watching' },
-    { name: 'Logos • Bannières • Affiches', type: 'Playing' },
     { name: 'ThirtyOne Lab\'s — design pro', type: 'Watching' },
+    { name: 'Best graphics server : thirty1', type: 'Playing' },
+    { name: 'ThirtyOne Studio', type: 'Watching' },
+    { name: 'ThirtyOne Creative Lab', type: 'Watching' },
+
+    // — Prestations
+    { name: 'Logos • Bannières • Affiches', type: 'Playing' },
+    { name: 'Loading Screens', type: 'Playing' },
+    { name: 'UI • HUD • Interfaces', type: 'Playing' },
+    { name: 'Overlays & Alertes', type: 'Playing' },
+    { name: 'Habillage TikTok / YouTube', type: 'Playing' },
+    { name: 'Motion Design', type: 'Playing' },
+    { name: 'Visuels animés', type: 'Playing' },
+    { name: 'Branding FiveM', type: 'Playing' },
+    { name: 'Branding Discord', type: 'Playing' },
+    { name: 'Identité visuelle', type: 'Playing' },
+    { name: 'Direction artistique', type: 'Playing' },
+    { name: 'UI / UX Design', type: 'Playing' },
+
+    // — Process / accroches
+    { name: 'Designing premium brands', type: 'Playing' },
+    { name: 'Creating visual identities', type: 'Playing' },
+    { name: 'Turning ideas into visuals', type: 'Playing' },
+    { name: 'Building your project', type: 'Playing' },
+    { name: 'Chaque pixel compte', type: 'Playing' },
+    { name: 'Qualité avant quantité', type: 'Playing' },
+    { name: 'Design Beyond Limits', type: 'Playing' },
+    { name: 'Where Brands Begin', type: 'Playing' },
+
+    // — Outils
+    { name: 'Photoshop', type: 'Playing' },
+    { name: 'After Effects', type: 'Playing' },
+    { name: 'Illustrator', type: 'Playing' },
+    { name: 'Figma', type: 'Playing' },
+
+    // — Appels à l'action / statut boutique
     { name: '/panel pour commander', type: 'Playing' },
+    { name: 'Commandes ouvertes', type: 'Watching' },
+    { name: 'Support disponible', type: 'Watching' },
+    { name: '48h de délais', type: 'Playing' },
+    { name: 'les nouveaux projets', type: 'Watching' },
+    { name: 'les avis clients ⭐', type: 'Watching' },
+    { name: 'vos futures créations', type: 'Watching' },
   ];
 }
 
