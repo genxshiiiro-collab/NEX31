@@ -21,9 +21,7 @@ const ACCESS = {
   blacklist: 'staff',
   profil: 'staff',
   // Commandes réservées aux administrateurs (packs + suivi checkpoints).
-  studioprices: 'admin',
   serverprices: 'admin',
-  studiocontent: 'admin',
   servercontent: 'admin',
   checkpoint: 'admin',
 };

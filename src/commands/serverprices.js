@@ -27,7 +27,7 @@ async function execute(interaction) {
 
     return interaction.reply({
       components: [c],
-      flags: MessageFlags.Ephemeral | V2,
+      flags: V2,
       allowedMentions: { parse: [] },
     });
   } catch (err) {

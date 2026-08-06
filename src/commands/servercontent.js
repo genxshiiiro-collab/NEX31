@@ -21,7 +21,7 @@ async function execute(interaction) {
     c.addSeparatorComponents(separator()).addTextDisplayComponents(text(`-# ${DELIVERY_NOTE}`));
     return interaction.reply({
       components: [c],
-      flags: MessageFlags.Ephemeral | V2,
+      flags: V2,
       allowedMentions: { parse: [] },
     });
   } catch (err) {
