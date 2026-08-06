@@ -31,7 +31,9 @@ const guilds = {
     reviewPublicChannelId: '1487131838131736708',    // avis publiés (après validation staff)
     orderChannelId: '1522060170824515775',                  // suivi des commandes + confirmations paiement
     logChannelId: '1489248278569549864',                         // transcripts + logs internes
-    memberLogChannelId: '',                                      // arrivées/départs (vide = utilise logChannelId)
+    memberLogChannelId: '',                                      // fallback arrivées+départs (vide = utilise logChannelId)
+    memberJoinChannelId: '1486375984390344827',                  // salon arrivées
+    memberLeaveChannelId: '1534736410798719058',                 // salon départs
 
     // Paiements (PayPal / Revolut)
     payment: {
@@ -201,6 +203,7 @@ const guildDefaults = {
   staffRoleIds: [], customerRoleId: '', graphisteRoleIds: [],
   ticketCategoryIds: [], reviewValidationChannelId: '', reviewPublicChannelId: '',
   orderChannelId: '', logChannelId: '', memberLogChannelId: '',
+  memberJoinChannelId: '', memberLeaveChannelId: '',
   payment: { paypal: '', revolut: '', validationChannelId: '' },
   excludedAutoRoleIds: [],
   customerTiers: [],

@@ -29,7 +29,7 @@ module.exports = {
         .addSeparatorComponents(invites.separator())
         .addTextDisplayComponents(invites.text(lines.join('\n')));
 
-      await invites.postMemberLog(member.guild, c);
+      await invites.postMemberLog(member.guild, c, 'leave');
     } catch (err) {
       log.error('invites', 'guildMemberRemove', err);
     }

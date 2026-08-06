@@ -93,15 +93,22 @@ async function resolveJoin(member) {
   return result;
 }
 
-/** Salon de log des arrivées/départs (dédié, sinon salon de logs général). */
-function memberLogChannelId(guildId) {
+/**
+ * Salon de log pour un type d'événement membre.
+ * @param {string} guildId
+ * @param {'join'|'leave'} [kind] salon dédié arrivée/départ, sinon salon commun.
+ */
+function memberLogChannelId(guildId, kind) {
   const cfg = config.forGuild(guildId);
-  return cfg.memberLogChannelId || cfg.logChannelId || '';
+  const dedicated = kind === 'join' ? cfg.memberJoinChannelId
+    : kind === 'leave' ? cfg.memberLeaveChannelId
+      : '';
+  return dedicated || cfg.memberLogChannelId || cfg.logChannelId || '';
 }
 
 /** Envoie un container V2 dans le salon de log des membres. */
-async function postMemberLog(guild, componentContainer) {
-  const channelId = memberLogChannelId(guild.id);
+async function postMemberLog(guild, componentContainer, kind) {
+  const channelId = memberLogChannelId(guild.id, kind);
   if (!channelId || channelId.startsWith('ID_')) return;
   const channel = await guild.client.channels.fetch(channelId).catch(() => null);
   if (!channel?.send) return;

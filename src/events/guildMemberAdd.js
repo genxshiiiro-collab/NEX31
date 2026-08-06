@@ -36,7 +36,7 @@ module.exports = {
           `**Membres** — ${member.guild.memberCount}`,
         ].join('\n')));
 
-      await invites.postMemberLog(member.guild, c);
+      await invites.postMemberLog(member.guild, c, 'join');
     } catch (err) {
       log.error('invites', 'guildMemberAdd', err);
     }
