@@ -23,6 +23,7 @@ function buildContentBlocks(category) {
       const prev = category.items[p.inheritsFrom];
       if (prev) lines.push(`-# Inclut tout le ${prev.name}, puis :`);
     }
+    if (Array.isArray(p.totals)) for (const item of p.totals) lines.push(`• ${item}`);
     for (const item of p.content) lines.push(`• ${item}`);
     if (p.note) lines.push(`-# ${p.note}`);
 
