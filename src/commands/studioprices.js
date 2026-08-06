@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { studio } = require('../config/packs');
+const { studio, DELIVERY_NOTE } = require('../config/packs');
 const { ensureAdmin } = require('../lib/adminGuard');
 const { V2, container, text, separator } = require('../lib/components');
 const log = require('../lib/logger');
@@ -22,6 +22,8 @@ async function execute(interaction) {
           `**${p.name}** — ${p.price}\n-# Livraison : ${p.delivery}`,
         ));
     }
+
+    c.addSeparatorComponents(separator()).addTextDisplayComponents(text(`-# ${DELIVERY_NOTE}`));
 
     return interaction.reply({
       components: [c],

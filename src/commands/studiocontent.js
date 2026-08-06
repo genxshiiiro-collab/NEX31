@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { studio } = require('../config/packs');
+const { studio, DELIVERY_NOTE } = require('../config/packs');
 const { ensureAdmin } = require('../lib/adminGuard');
 const { V2, container, text, separator } = require('../lib/components');
 const { buildContentBlocks } = require('../lib/packContent');
@@ -18,6 +18,7 @@ async function execute(interaction) {
     for (const block of buildContentBlocks(studio)) {
       c.addSeparatorComponents(separator()).addTextDisplayComponents(text(block));
     }
+    c.addSeparatorComponents(separator()).addTextDisplayComponents(text(`-# ${DELIVERY_NOTE}`));
     return interaction.reply({
       components: [c],
       flags: MessageFlags.Ephemeral | V2,

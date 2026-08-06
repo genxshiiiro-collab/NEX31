@@ -61,7 +61,7 @@ const studio = {
     advanced: {
       name: 'Advanced Studio',
       price: '95 €',
-      delivery: '4–6 jours',
+      delivery: '7–9 jours',
       inheritsFrom: 'intermediate',
       content: [
         'Bannière Tarifs',
@@ -82,7 +82,7 @@ const studio = {
     elite: {
       name: 'Elite Studio',
       price: '145 €',
-      delivery: '6–8 jours',
+      delivery: '10–12 jours',
       inheritsFrom: 'advanced',
       content: [
         '4 variations de couleur au total',
@@ -148,7 +148,7 @@ const server = {
     advanced: {
       name: 'Advanced Server',
       price: '110 €',
-      delivery: '4–6 jours',
+      delivery: '7–9 jours',
       inheritsFrom: 'intermediate',
       note: 'UI simple = une seule interface (design uniquement, sans développement) : HUD, Inventaire, Téléphone, Boutique, Garage, Menu métier, Menu personnage ou Interface de faction.',
       content: [
@@ -168,7 +168,7 @@ const server = {
     elite: {
       name: 'Elite Server',
       price: '165 €',
-      delivery: '6–8 jours',
+      delivery: '10–12 jours',
       inheritsFrom: 'advanced',
       content: [
         '4 variations de couleur au total',
@@ -194,6 +194,9 @@ const server = {
 };
 
 const packs = { studio, server };
+
+// Note affichée sous les tarifs / contenus : point de départ du délai.
+const DELIVERY_NOTE = 'Les délais courent à partir du lancement de la commande.';
 
 // ---------------------------------------------------------------------
 //  CHECKPOINTS — durées de projet et rappels
@@ -228,4 +231,4 @@ function getPack(type, key) {
   return cat.items[key] || null;
 }
 
-module.exports = { packs, studio, server, checkpointConfig, getPack, COLORS };
+module.exports = { packs, studio, server, checkpointConfig, getPack, COLORS, DELIVERY_NOTE };
