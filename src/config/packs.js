@@ -38,6 +38,7 @@ const studio = {
         '1 variation de couleur',
         'Bannière Discord',
         'Bannière de présentation du studio',
+        'Logo animé',
         '1 révision',
       ],
     },
@@ -48,7 +49,6 @@ const studio = {
       inheritsFrom: 'starter',
       content: [
         '3 variations de couleur au total',
-        'Logo animé',
         'Bannière Discord Invite',
         'Bannière Services',
         '1 bannière publicitaire horizontale',
@@ -119,12 +119,13 @@ const server = {
       price: '20 €',
       delivery: '2–3 jours',
       inheritsFrom: null,
-      note: 'Pack volontairement limité (ni logo animé, ni UI, ni icônes, ni loading screen).',
+      note: 'Pack volontairement limité (ni UI, ni icônes, ni loading screen).',
       content: [
         'Logo principal',
         '1 variation de couleur',
         'Bannière Discord',
         'Bannière FiveM',
+        'Logo animé',
         '1 révision',
       ],
     },
@@ -135,7 +136,6 @@ const server = {
       inheritsFrom: 'starter',
       content: [
         '3 variations de couleur au total',
-        'Logo animé',
         'Bannière Discord Invite',
         'Bannière FiveM List',
         '1 bannière publicitaire horizontale',
