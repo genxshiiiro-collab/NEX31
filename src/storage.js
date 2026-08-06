@@ -15,7 +15,9 @@ const DEFAULT_DB = {
   legacyReviews: {}, // id -> avis historiques (salon NSH / seed)
   payments: {},    // paymentId -> { id, guildId, userId, amount, method, status, ... }
   clientTotals: {}, // guildId -> { userId -> total dépensé }
-  counters: { review: 0, order: 0, payment: 0 },
+  checkpoints: {}, // checkpointId (CP-0001) -> suivi commande + rappels (voir lib/checkpoints.js)
+  memberJoins: {}, // guildId -> { userId -> { inviterId, code, type, joinedAt } } (arrivées : qui a invité)
+  counters: { review: 0, order: 0, payment: 0, checkpoint: 0 },
 };
 
 /** L'utilisateur est-il blacklisté sur ce serveur ? */
@@ -53,6 +55,11 @@ function load() {
     }
     for (const k of Object.keys(DEFAULT_DB)) {
       if (fresh[k] === undefined) fresh[k] = structuredClone(DEFAULT_DB[k]);
+    }
+    // Compteurs manquants sur une base existante (ex : checkpoint ajouté après coup).
+    if (!fresh.counters) fresh.counters = structuredClone(DEFAULT_DB.counters);
+    for (const ck of Object.keys(DEFAULT_DB.counters)) {
+      if (fresh.counters[ck] === undefined) fresh.counters[ck] = DEFAULT_DB.counters[ck];
     }
     // Plancher du numéro de commande : la prochaine /commande sera au minimum ce
     // numéro. Appliqué à CHAQUE démarrage (même sur une base existante), donc

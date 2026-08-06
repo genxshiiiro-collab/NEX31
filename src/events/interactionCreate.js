@@ -10,8 +10,31 @@ const { validationContainer, publicContainer } = require('../commands/avis');
 const { createTicket, closeTicket, claimTicket } = require('../lib/tickets');
 const { approvePayment, rejectPayment } = require('../lib/payments');
 const { applyPastilleFromInteraction } = require('../lib/ticketPastille');
+const { isAdmin } = require('../lib/adminGuard');
+const checkpoints = require('../lib/checkpoints');
 const config = require('../../config');
 const log = require('../lib/logger');
+
+async function handleCheckpointButton(interaction, action, id) {
+  if (!isAdmin(interaction)) {
+    return interaction.reply({ content: "Vous n'avez pas la permission d'utiliser cette commande.", flags: MessageFlags.Ephemeral });
+  }
+  if (action === 'delno') {
+    return interaction.update({ content: 'Suppression annulée.', components: [] });
+  }
+  if (action === 'delok') {
+    const item = checkpoints.get(id);
+    if (!item || item.guildId !== interaction.guild.id) {
+      return interaction.update({ content: `Checkpoint \`${id}\` introuvable (déjà supprimé ?).`, components: [] });
+    }
+    checkpoints.deleteCheckpoint(id);
+    log.event(interaction.guild, {
+      level: 'warn', scope: 'checkpoint', title: `Checkpoint ${id} supprimé`,
+      fields: [{ name: 'Par', value: `<@${interaction.user.id}>`, inline: true }],
+    });
+    return interaction.update({ content: `Checkpoint **${id}** supprimé.`, components: [] });
+  }
+}
 
 async function handleTicketButton(interaction, action) {
   if (action === 'new') return createTicket(interaction, 'commande');
@@ -233,6 +256,7 @@ module.exports = {
         if (ns === 'pay') return await handlePayButton(interaction, action, id);
         if (ns === 'order' && action === 'step') return await handleOrderStep(interaction, id, extra);
         if (ns === 'ticket') return await handleTicketButton(interaction, action);
+        if (ns === 'cp') return await handleCheckpointButton(interaction, action, id);
         return;
       }
 

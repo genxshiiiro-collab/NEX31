@@ -31,6 +31,7 @@ const guilds = {
     reviewPublicChannelId: '1487131838131736708',    // avis publiés (après validation staff)
     orderChannelId: '1522060170824515775',                  // suivi des commandes + confirmations paiement
     logChannelId: '1489248278569549864',                         // transcripts + logs internes
+    memberLogChannelId: '',                                      // arrivées/départs (vide = utilise logChannelId)
 
     // Paiements (PayPal / Revolut)
     payment: {
@@ -61,6 +62,7 @@ const guilds = {
     reviewPublicChannelId: '1522264785725558844',
     orderChannelId: '1520728813749932153',
     logChannelId: '1522264969226354759',
+    memberLogChannelId: '',                 // arrivées/départs (vide = utilise logChannelId)
 
     payment: {
       paypal: 'https://paypal.me/ZforceGraph',
@@ -181,13 +183,24 @@ const shared = {
 
   // Logs : true = affiche aussi les logs "debug" (verbeux) dans la console.
   debugLogs: false,
+
+  // ---- Suivi des arrivées / départs (+ qui a invité / provenance) ----
+  //  IMPORTANT : passer enabled à true UNIQUEMENT après avoir activé
+  //  "SERVER MEMBERS INTENT" dans le portail Discord (Developer Portal >
+  //  ton application > Bot > Privileged Gateway Intents). Sinon le bot
+  //  refuse de se connecter (intent non autorisé).
+  //  La détection de l'inviteur nécessite aussi que le bot ait la
+  //  permission "Gérer le serveur" (lecture des invitations).
+  //  Le salon des logs d'arrivée/départ est memberLogChannelId par serveur
+  //  (à défaut : logChannelId).
+  memberTracking: { enabled: true },
 };
 
 // Valeurs par défaut si un serveur n'est pas (encore) configuré : évite les plantages.
 const guildDefaults = {
   staffRoleIds: [], customerRoleId: '', graphisteRoleIds: [],
   ticketCategoryIds: [], reviewValidationChannelId: '', reviewPublicChannelId: '',
-  orderChannelId: '', logChannelId: '',
+  orderChannelId: '', logChannelId: '', memberLogChannelId: '',
   payment: { paypal: '', revolut: '', validationChannelId: '' },
   excludedAutoRoleIds: [],
   customerTiers: [],

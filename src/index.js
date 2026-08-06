@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
 const { load } = require('./storage');
+const config = require('../config');
 const log = require('./lib/logger');
 
 if (!process.env.DISCORD_TOKEN) {
@@ -15,14 +16,23 @@ const { ensureLegacySeeds } = require('./lib/reviewStats');
 ensureLegacySeeds();
 log.info('bot', 'Base de données chargée');
 
+const intents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.MessageContent, // intent privilégié — à activer dans le portail Discord
+  // GuildMembers volontairement omis par défaut : intent privilégié souvent désactivé.
+  // Les pastilles utilisent message.member + fetch ponctuel (ticketPastille.js).
+];
+// Suivi arrivées/départs + inviteur : nécessite GuildMembers (privilégié) et
+// GuildInvites. Activés UNIQUEMENT si memberTracking.enabled = true, sinon le
+// bot refuserait de se connecter tant que l'intent n'est pas coché au portail.
+if (config.memberTracking?.enabled) {
+  intents.push(GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildInvites);
+  log.info('bot', 'Suivi des membres activé (intents GuildMembers + GuildInvites)');
+}
+
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent, // intent privilégié — à activer dans le portail Discord
-    // GuildMembers volontairement omis : intent privilégié souvent désactivé.
-    // Les pastilles utilisent message.member + fetch ponctuel (ticketPastille.js).
-  ],
+  intents,
   partials: [Partials.Channel, Partials.GuildMember, Partials.Message],
 });
 

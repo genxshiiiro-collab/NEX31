@@ -4,7 +4,7 @@
 
 const { PermissionFlagsBits } = require('discord.js');
 
-/** @typedef {'public' | 'customer' | 'staff'} CommandAccess */
+/** @typedef {'public' | 'customer' | 'staff' | 'admin'} CommandAccess */
 
 /** @type {Record<string, CommandAccess>} */
 const ACCESS = {
@@ -20,6 +20,12 @@ const ACCESS = {
   ticket: 'staff',
   blacklist: 'staff',
   profil: 'staff',
+  // Commandes réservées aux administrateurs (packs + suivi checkpoints).
+  studioprices: 'admin',
+  serverprices: 'admin',
+  studiocontent: 'admin',
+  servercontent: 'admin',
+  checkpoint: 'admin',
 };
 
 function accessFor(commandName) {
@@ -45,7 +51,9 @@ function applyDefaultPermissions(cmdJson, guildId) {
   const cfg = require('../../config').forGuild(guildId);
   let bit = null;
 
-  if (level === 'staff') {
+  if (level === 'admin') {
+    bit = PermissionFlagsBits.Administrator;
+  } else if (level === 'staff') {
     bit = permBit(cfg.staffSlashPermission) ?? PermissionFlagsBits.ManageChannels;
   } else if (level === 'customer') {
     bit = permBit(cfg.customerSlashPermission);

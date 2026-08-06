@@ -6,6 +6,11 @@ const { db, save } = require('../storage');
 const config = require('../../config');
 const { startPresenceRotation } = require('../lib/presence');
 const { deployCommands } = require('../lib/deployCommands');
+const { runCheckpointCycle } = require('../lib/checkpoints');
+const invites = require('../lib/inviteTracker');
+
+// Vérification des rappels de checkpoints toutes les 10 min (dans la fenêtre 5–15).
+const CHECKPOINT_CYCLE_MS = 10 * 60 * 1000;
 
 /** Relance le staff sur les tickets restés "rouge" trop longtemps. */
 async function checkRelances(client) {
@@ -60,5 +65,13 @@ module.exports = {
 
     checkRelances(client).catch((e) => log.error('relance', 'checkRelances', e));
     setInterval(() => checkRelances(client).catch((e) => log.error('relance', 'checkRelances', e)), 60 * 1000);
+
+    // Rappels de checkpoints : un passage au démarrage (rattrape les rappels
+    // manqués pendant une coupure) puis toutes les 10 minutes.
+    runCheckpointCycle(client).catch((e) => log.error('checkpoint', 'Cycle initial', e));
+    setInterval(() => runCheckpointCycle(client).catch((e) => log.error('checkpoint', 'Cycle', e)), CHECKPOINT_CYCLE_MS);
+
+    // Suivi des membres : amorce le cache des invitations (pour détecter l'inviteur).
+    invites.primeAll(client).catch((e) => log.error('invites', 'primeAll', e));
   },
 };
