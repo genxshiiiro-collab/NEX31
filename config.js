@@ -196,6 +196,19 @@ const shared = {
   //  Le salon des logs d'arrivée/départ est memberLogChannelId par serveur
   //  (à défaut : logChannelId).
   memberTracking: { enabled: true },
+
+  // ---- Support IA (OpenAI) : réponses autonomes dans les tickets ----
+  //  Nécessite OPENAI_API_KEY dans .env. L'IA répond aux messages du client
+  //  tant qu'aucun staff n'a cliqué "Prendre en charge" (claim). Après claim,
+  //  elle se tait. Activable/désactivable par serveur via /ai on|off.
+  ai: {
+    enabled: true,            // interrupteur global (en plus de la clé OPENAI_API_KEY)
+    model: 'gpt-4o-mini',     // modèle OpenAI (économique)
+    temperature: 0.3,
+    maxTokens: 400,
+    historyMessages: 25,      // nb de messages du ticket lus comme contexte
+    cooldownSeconds: 8,       // anti-doublon : délai mini entre 2 réponses IA dans un salon
+  },
 };
 
 // Valeurs par défaut si un serveur n'est pas (encore) configuré : évite les plantages.

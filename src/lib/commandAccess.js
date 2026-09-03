@@ -24,6 +24,7 @@ const ACCESS = {
   serverprices: 'admin',
   servercontent: 'admin',
   checkpoint: 'admin',
+  ai: 'admin',
 };
 
 function accessFor(commandName) {

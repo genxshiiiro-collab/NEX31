@@ -1,6 +1,7 @@
 const config = require('../../config');
 const { handlePrefix } = require('../lib/prefixCommands');
 const { updateFromMessage } = require('../lib/ticketPastille');
+const { handleTicketMessage } = require('../lib/aiSupport');
 const log = require('../lib/logger');
 
 module.exports = {
@@ -22,5 +23,8 @@ module.exports = {
     } catch (err) {
       log.error('pastille', 'Mise à jour pastille impossible', err);
     }
+
+    // Réponse IA autonome dans les tickets (silencieuse si conditions non remplies).
+    handleTicketMessage(message).catch((err) => log.error('ai', 'messageCreate', err));
   },
 };

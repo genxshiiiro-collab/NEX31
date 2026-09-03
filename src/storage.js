@@ -17,6 +17,7 @@ const DEFAULT_DB = {
   clientTotals: {}, // guildId -> { userId -> total dépensé }
   checkpoints: {}, // checkpointId (CP-0001) -> suivi commande + rappels (voir lib/checkpoints.js)
   memberJoins: {}, // guildId -> { userId -> { inviterId, code, type, joinedAt } } (arrivées : qui a invité)
+  aiState: {},   // guildId -> { enabled: bool } (override /ai on|off ; défaut = config.ai.enabled)
   counters: { review: 0, order: 0, payment: 0, checkpoint: 0 },
 };
 
