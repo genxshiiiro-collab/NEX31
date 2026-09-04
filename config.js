@@ -37,8 +37,8 @@ const guilds = {
 
     // Paiements (PayPal / Revolut)
     payment: {
-      paypal: 'https://paypal.me/shiiirokhallass',
-      revolut: '@nshyy31',
+      paypal: process.env.PAYPAL_31LABS || '',   // valeurs dans .env (jamais commit)
+      revolut: process.env.REVOLUT_31LABS || '',
       validationChannelId: '1522059840120295424', // staff valide les paiements ici
     },
     // Paliers client selon le total dépensé (Partners exclu — manuel uniquement).
@@ -67,8 +67,8 @@ const guilds = {
     memberLogChannelId: '',                 // arrivées/départs (vide = utilise logChannelId)
 
     payment: {
-      paypal: 'https://paypal.me/ZforceGraph',
-      revolut: '',
+      paypal: process.env.PAYPAL_ZFORCE || '',   // valeur dans .env (jamais commit)
+      revolut: process.env.REVOLUT_ZFORCE || '',
       validationChannelId: '1522266492094120129',
     },
   },
