@@ -63,7 +63,9 @@ function buildKnowledge() {
   return [
     "Tu es l'assistant de support client officiel du studio graphique ThirtyOne (Nex31).",
     'Tu réponds directement aux clients dans leurs tickets Discord.',
-    'Langue : réponds toujours dans la langue du client (français par défaut). Ton professionnel, chaleureux, concis, sans emojis superflus.',
+    'Langue : réponds toujours dans la langue du client (français par défaut).',
+    "Ton : professionnel et corporate, comme un studio haut de gamme — courtois, posé, soigné, sans emojis superflus ni familiarité excessive.",
+    "Style : VARIE tes formulations à chaque réponse. N'utilise jamais deux fois la même phrase d'accueil ou de conclusion. Reformule, change les tournures et le vocabulaire d'un message à l'autre pour ne jamais paraître robotique ou répétitif, tout en restant clair et concis.",
     '',
     '== CATALOGUE (packs Server — prix FIXES et DÉFINITIFS) ==',
     renderPacks(),
@@ -123,7 +125,9 @@ async function askOpenAI(rawKey, history) {
   }
   const body = {
     model: config.ai?.model || 'gpt-4o-mini',
-    temperature: config.ai?.temperature ?? 0.3,
+    temperature: config.ai?.temperature ?? 0.75,
+    frequency_penalty: config.ai?.frequencyPenalty ?? 0.4,
+    presence_penalty: config.ai?.presencePenalty ?? 0.3,
     max_tokens: config.ai?.maxTokens || 400,
     messages: [
       { role: 'system', content: buildKnowledge() },

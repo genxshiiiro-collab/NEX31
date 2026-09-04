@@ -204,7 +204,9 @@ const shared = {
   ai: {
     enabled: true,            // interrupteur global (en plus de la clé OPENAI_API_KEY)
     model: 'gpt-4o-mini',     // modèle OpenAI (économique)
-    temperature: 0.3,
+    temperature: 0.75,        // + haut = réponses plus variées (garde le cadre des règles)
+    frequencyPenalty: 0.4,    // pénalise la répétition de tournures
+    presencePenalty: 0.3,     // pousse à varier le vocabulaire
     maxTokens: 400,
     historyMessages: 25,      // nb de messages du ticket lus comme contexte
     cooldownSeconds: 8,       // anti-doublon : délai mini entre 2 réponses IA dans un salon
