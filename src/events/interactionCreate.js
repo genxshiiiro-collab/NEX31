@@ -203,6 +203,27 @@ async function handleOrderStep(interaction, id, action) {
   }
 }
 
+/** Staff clique "Stopper l'IA" sous une réponse IA : coupe l'IA sur ce ticket. */
+async function handleAiStop(interaction) {
+  if (!isStaff(interaction.member)) {
+    return interaction.reply({ content: '❌ Réservé au staff.', flags: MessageFlags.Ephemeral });
+  }
+  const meta = db.tickets[interaction.channel.id];
+  if (meta) { meta.aiPaused = true; save(); }
+  const base = interaction.message.content || '';
+  await interaction.update({
+    content: `${base}\n\n-# ✋ IA stoppée par <@${interaction.user.id}> — le staff reprend la main.`,
+    components: [],
+  }).catch(() => {});
+  log.event(interaction.guild, {
+    level: 'info', scope: 'ai', title: '✋ IA stoppée sur un ticket',
+    fields: [
+      { name: 'Salon', value: `${interaction.channel}`, inline: true },
+      { name: 'Par', value: `<@${interaction.user.id}>`, inline: true },
+    ],
+  });
+}
+
 async function handlePayButton(interaction, action, id) {
   if (action === 'approve') return approvePayment(interaction, id);
   if (action === 'reject') {
@@ -256,6 +277,7 @@ module.exports = {
         if (ns === 'pay') return await handlePayButton(interaction, action, id);
         if (ns === 'order' && action === 'step') return await handleOrderStep(interaction, id, extra);
         if (ns === 'ticket') return await handleTicketButton(interaction, action);
+        if (ns === 'ai' && action === 'stop') return await handleAiStop(interaction);
         if (ns === 'cp') return await handleCheckpointButton(interaction, action, id);
         return;
       }
