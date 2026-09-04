@@ -26,7 +26,6 @@ function stopRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('ai:stop')
-      .setLabel("Stopper l'IA (reprendre la main)")
       .setEmoji('✋')
       .setStyle(ButtonStyle.Secondary),
   );
