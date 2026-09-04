@@ -106,7 +106,14 @@ async function buildHistory(channel, guildId) {
 }
 
 /** Appel OpenAI Chat Completions. Renvoie le texte, ou null en cas d'échec. */
-async function askOpenAI(apiKey, history) {
+async function askOpenAI(rawKey, history) {
+  // Nettoie la clé : espaces, retours ligne et tout caractère non-ASCII (ex: •
+  // collé par erreur) casseraient le header Authorization (ByteString).
+  const apiKey = String(rawKey || '').replace(/[^\x21-\x7e]/g, '');
+  if (!apiKey) { log.warn('ai', 'Clé OpenAI vide/invalide après nettoyage'); return null; }
+  if (apiKey !== String(rawKey || '').trim()) {
+    log.warn('ai', 'Clé OpenAI contenait des caractères invalides (nettoyés) — vérifie ton .env');
+  }
   const body = {
     model: config.ai?.model || 'gpt-4o-mini',
     temperature: config.ai?.temperature ?? 0.3,
@@ -180,10 +187,13 @@ async function handleTicketMessage(message) {
       const history = await buildHistory(channel, guild.id);
       if (!history) return;
       const reply = await askOpenAI(apiKey, history);
-      if (!reply) return;
       // Re-vérifie qu'aucun staff n'a claim pendant la génération.
       if (db.tickets[channel.id]?.claimedBy) return;
-      await channel.send({ content: reply, allowedMentions: { parse: [] } }).catch(() => {});
+      // Échec API (quota, réseau, etc.) : au lieu du silence ("il se désiste"),
+      // on rassure le client et on laisse la main au staff.
+      const out = reply
+        || 'Merci pour ton message ! Un membre du staff va te répondre rapidement.';
+      await channel.send({ content: out, allowedMentions: { parse: [] } }).catch(() => {});
       lastReplyAt.set(channel.id, Date.now());
     } finally {
       inFlight.delete(channel.id);
