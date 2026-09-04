@@ -107,12 +107,19 @@ async function buildHistory(channel, guildId) {
 
 /** Appel OpenAI Chat Completions. Renvoie le texte, ou null en cas d'échec. */
 async function askOpenAI(rawKey, history) {
-  // Nettoie la clé : espaces, retours ligne et tout caractère non-ASCII (ex: •
-  // collé par erreur) casseraient le header Authorization (ByteString).
-  const apiKey = String(rawKey || '').replace(/[^\x21-\x7e]/g, '');
+  // Nettoie la clé de façon défensive contre les erreurs de .env courantes :
+  //  - nom de variable recollé dans la valeur (OPENAI_API_KEY=OPENAI_API_KEY=sk-...)
+  //  - guillemets autour de la valeur
+  //  - espaces, retours ligne, caractères non-ASCII (ex: •) qui casseraient
+  //    le header Authorization (ByteString) ou invalident la clé.
+  const original = String(rawKey || '').trim();
+  let apiKey = original;
+  apiKey = apiKey.replace(/^(?:OPENAI_API_KEY\s*=\s*)+/i, ''); // nom collé dans la valeur
+  apiKey = apiKey.replace(/^["']|["']$/g, '');                  // guillemets
+  apiKey = apiKey.replace(/[^\x21-\x7e]/g, '');                 // non-ASCII / espaces
   if (!apiKey) { log.warn('ai', 'Clé OpenAI vide/invalide après nettoyage'); return null; }
-  if (apiKey !== String(rawKey || '').trim()) {
-    log.warn('ai', 'Clé OpenAI contenait des caractères invalides (nettoyés) — vérifie ton .env');
+  if (apiKey !== original) {
+    log.warn('ai', 'Clé OpenAI nettoyée (nom de variable/guillemets/caractères en trop retirés) — pense à corriger ton .env');
   }
   const body = {
     model: config.ai?.model || 'gpt-4o-mini',
