@@ -13,6 +13,7 @@ const { applyPastilleFromInteraction } = require('../lib/ticketPastille');
 const { isAdmin } = require('../lib/adminGuard');
 const checkpoints = require('../lib/checkpoints');
 const globalBan = require('../lib/globalBan');
+const verification = require('../lib/verification');
 const config = require('../../config');
 const log = require('../lib/logger');
 
@@ -264,6 +265,12 @@ module.exports = {
         return await cmd.execute(interaction);
       }
 
+      // --- Autocomplétion ---
+      if (interaction.isAutocomplete()) {
+        const cmd = interaction.client.commands.get(interaction.commandName);
+        return await cmd?.autocomplete?.(interaction);
+      }
+
       // --- Menus déroulants ---
       if (interaction.isStringSelectMenu()) {
         const [ns, action] = interaction.customId.split(':');
@@ -281,6 +288,7 @@ module.exports = {
         if (ns === 'ai' && action === 'stop') return await handleAiStop(interaction);
         if (ns === 'cp') return await handleCheckpointButton(interaction, action, id);
         if (ns === 'gban') return await globalBan.handleButton(interaction, action, id, extra);
+        if (ns === 'verif') return await verification.handleButton(interaction, action, id, extra);
         return;
       }
 

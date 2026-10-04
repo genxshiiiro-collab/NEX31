@@ -1,4 +1,6 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const {
+  SlashCommandBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle,
+} = require('discord.js');
 const { db } = require('../storage');
 const { V2, container, text, separator } = require('../lib/components');
 const gb = require('../lib/globalBan');
@@ -12,7 +14,7 @@ const data = new SlashCommandBuilder()
     .addStringOption((o) => o.setName('alts').setDescription('IDs d\'autres comptes à lier, séparés par espace ou virgule'))
     .addIntegerOption((o) => o.setName('supprimer_jours').setDescription('Supprimer ses messages des X derniers jours').setMinValue(0).setMaxValue(7)))
   .addSubcommand((s) => s.setName('remove').setDescription('Lever un ban global')
-    .addStringOption((o) => o.setName('id').setDescription('ID du compte').setRequired(true))
+    .addStringOption((o) => o.setName('id').setDescription('Compte banni (tape un pseudo ou un ID)').setRequired(true).setAutocomplete(true))
     .addBooleanOption((o) => o.setName('alts').setDescription('Débannir aussi ses alts liés')))
   .addSubcommand((s) => s.setName('alt').setDescription('Lier un alt : si l\'un est banni, l\'autre aussi')
     .addUserOption((o) => o.setName('principal').setDescription('Compte principal').setRequired(true))
@@ -56,7 +58,11 @@ async function execute(interaction) {
         { name: 'Raison', value: reason, inline: true },
       ],
     });
-    return interaction.editReply(card('Ban global appliqué', `${lines}\n\nRaison : ${reason}`));
+    const reply = card('Ban global appliqué', `${lines}\n\nRaison : ${reason}`);
+    reply.components[0].addActionRowComponents(new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`gban:unban:${user.id}`).setLabel('Lever ce gban').setStyle(ButtonStyle.Secondary),
+    ));
+    return interaction.editReply(reply);
   }
 
   if (sub === 'remove') {
@@ -110,4 +116,14 @@ async function execute(interaction) {
   return interaction.reply(ephemeral(card(`Vérification de ${user.tag}`, body, m?.score >= gb.QUARANTINE_SCORE ? 0xf39c12 : 0x95a5a6)));
 }
 
-module.exports = { data, execute };
+/** /gban remove : propose les comptes bannis (pseudo ou ID). */
+async function autocomplete(interaction) {
+  const query = interaction.options.getFocused().toLowerCase();
+  const choices = Object.entries(db.globalBans)
+    .filter(([id, b]) => id.includes(query) || (b.tag || '').toLowerCase().includes(query))
+    .slice(-25).reverse()
+    .map(([id, b]) => ({ name: `${b.tag} — ${b.reason}`.slice(0, 100), value: id }));
+  return interaction.respond(choices);
+}
+
+module.exports = { data, execute, autocomplete };

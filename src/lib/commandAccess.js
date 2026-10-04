@@ -26,6 +26,7 @@ const ACCESS = {
   checkpoint: 'admin',
   ai: 'admin',
   gban: 'admin',
+  verif: 'admin',
 };
 
 function accessFor(commandName) {

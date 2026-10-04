@@ -179,6 +179,9 @@ async function onJoin(member) {
     return;
   }
 
+  // Chargé ici : verification.js importe déjà ce module.
+  const verifConfigured = await require('./verification').giveVisitorRole(member);
+
   const user = await member.client.users.fetch(member.id, { force: true }).catch(() => member.user);
   const match = bestMatch(user);
   if (!match || match.score < QUARANTINE_SCORE) return;
@@ -195,6 +198,8 @@ async function onJoin(member) {
     logAll(member.client, { level: 'error', title: 'Alt détecté et banni partout', fields });
     return;
   }
+  // Vérification en place : le rôle Visiteur suffit, le tri se fait au bouton "Vérifier".
+  if (verifConfigured) return;
 
   await member.timeout(QUARANTINE_MS, `Alt suspect de ${match.id}`)
     .catch((err) => log.warn('gban', 'Quarantaine impossible', { id: member.id, detail: err.message }));
@@ -238,6 +243,17 @@ async function handleButton(interaction, action, id, of) {
     });
     return;
   }
+  if (action === 'unban') {
+    const ids = cluster(id).filter((x) => db.globalBans[x]);
+    if (!ids.length) {
+      return interaction.reply({ content: "Ce compte n'est plus banni globalement.", flags: MessageFlags.Ephemeral });
+    }
+    const mentions = ids.map((x) => `<@${x}>`).join(', ');
+    await done('Ban global levé', `${mentions} — par <@${interaction.user.id}>`, 0x2ecc71);
+    await globalUnban(interaction.client, ids);
+    logAll(interaction.client, { level: 'info', title: 'Ban global levé', description: `${mentions} par <@${interaction.user.id}>` });
+    return;
+  }
   if (action === 'ok') {
     const member = await interaction.guild.members.fetch(id).catch(() => null);
     await member?.timeout(null, 'Faux positif alt').catch(() => {});
@@ -247,5 +263,5 @@ async function handleButton(interaction, action, id, of) {
 
 module.exports = {
   canGlobalBan, link, cluster, parseIds, bestMatch, globalBan, globalUnban, logAll, onJoin, handleButton,
-  QUARANTINE_SCORE,
+  AUTO_BAN_SCORE, QUARANTINE_SCORE,
 };
