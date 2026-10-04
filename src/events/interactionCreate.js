@@ -12,6 +12,7 @@ const { approvePayment, rejectPayment } = require('../lib/payments');
 const { applyPastilleFromInteraction } = require('../lib/ticketPastille');
 const { isAdmin } = require('../lib/adminGuard');
 const checkpoints = require('../lib/checkpoints');
+const globalBan = require('../lib/globalBan');
 const config = require('../../config');
 const log = require('../lib/logger');
 
@@ -279,6 +280,7 @@ module.exports = {
         if (ns === 'ticket') return await handleTicketButton(interaction, action);
         if (ns === 'ai' && action === 'stop') return await handleAiStop(interaction);
         if (ns === 'cp') return await handleCheckpointButton(interaction, action, id);
+        if (ns === 'gban') return await globalBan.handleButton(interaction, action, id, extra);
         return;
       }
 

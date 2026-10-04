@@ -25,6 +25,7 @@ const ACCESS = {
   servercontent: 'admin',
   checkpoint: 'admin',
   ai: 'admin',
+  gban: 'admin',
 };
 
 function accessFor(commandName) {
