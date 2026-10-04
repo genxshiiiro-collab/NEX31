@@ -20,6 +20,7 @@ const { db, save } = require('../storage');
 const { server } = require('../config/packs');
 const { isTicketChannel, isStaffMember } = require('./helpers');
 const log = require('./logger');
+const { styleDirective, fallbackReply } = require('./aiStyle');
 
 /** Bouton "Stopper l'IA" placé sous chaque réponse IA (staff uniquement). */
 function stopRow() {
@@ -72,11 +73,12 @@ function renderPacks() {
 /** Base de connaissance + règles strictes (prompt système). */
 function buildKnowledge() {
   return [
-    "Tu es l'assistant de support client officiel du studio graphique ThirtyOne (Nex31).",
-    'Tu réponds directement aux clients dans leurs tickets Discord.',
+    "Tu fais partie de l'équipe support de 31 Labs (ThirtyOne Lab's), studio graphique spécialisé dans l'identité visuelle de serveurs Discord / FiveM.",
+    'Tu réponds directement aux clients dans leurs tickets Discord, au nom de 31 Labs.',
     'Langue : réponds toujours dans la langue du client (français par défaut).',
-    "Ton : professionnel et corporate, comme un studio haut de gamme — courtois, posé, soigné, sans emojis superflus ni familiarité excessive.",
-    "Style : VARIE tes formulations à chaque réponse. N'utilise jamais deux fois la même phrase d'accueil ou de conclusion. Reformule, change les tournures et le vocabulaire d'un message à l'autre pour ne jamais paraître robotique ou répétitif, tout en restant clair et concis.",
+    "Registre : calque-toi sur le client. S'il vouvoie, vouvoie ; sinon tutoie. Toujours pro, jamais familier ni vulgaire, pas d'emojis.",
+    "Ton : celui d'un humain de l'équipe 31 Labs, pas d'un chatbot. Réponds à SA question précise, avec ses mots à lui, plutôt qu'une réponse type. Mentionne 31 Labs quand c'est naturel, pas à chaque message.",
+    "Chaque réponse reçoit une consigne de style différente (voix, ouverture, structure, fin) : applique-la à la lettre, elle prime sur tes habitudes de formulation, mais jamais sur les règles ci-dessous.",
     '',
     '== CATALOGUE (packs Server — prix FIXES et DÉFINITIFS) ==',
     renderPacks(),
@@ -96,7 +98,7 @@ function buildKnowledge() {
     "10. Montage / production vidéo : ce studio ne traite PAS les demandes vidéo ici. Si un client demande une vidéo, un montage, un edit ou du motion vidéo, redirige-le poliment vers https://discord.gg/REC709 (le serveur dédié à la vidéo).",
     "11. Intention d'achat : dès qu'un client exprime vouloir un pack ou passer commande (ex: « je veux un pack », « je voudrais commander », « c'est quoi les offres »), présente-lui DIRECTEMENT la liste des packs Server avec leurs prix (Starter, Intermediate, Advanced, Elite), de façon claire et concise, puis invite-le à choisir.",
     '',
-    'Réponds de façon courte et utile (quelques phrases maximum).',
+    'Reste utile et concis : la longueur exacte est donnée par la consigne de style.',
   ].join('\n');
 }
 
@@ -106,22 +108,24 @@ async function buildHistory(channel, guildId) {
   const ownerId = meta?.ownerId;
   const limit = config.ai?.historyMessages || 25;
   const batch = await channel.messages.fetch({ limit: Math.min(limit, 100) }).catch(() => null);
-  if (!batch) return '';
+  if (!batch) return { text: '', botReplies: [] };
   const msgs = [...batch.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
   const lines = [];
+  const botReplies = [];
   for (const m of msgs) {
     const content = (m.content || '').trim();
     if (!content) continue;
     const who = m.author.bot ? 'Support' : (m.author.id === ownerId ? 'Client' : 'Support');
+    if (m.author.bot) botReplies.push(content);
     lines.push(`[${who}] ${content}`);
   }
   let text = lines.join('\n');
   if (text.length > 6000) text = text.slice(-6000); // borne le coût
-  return text;
+  return { text, botReplies };
 }
 
 /** Appel OpenAI Chat Completions. Renvoie le texte, ou null en cas d'échec. */
-async function askOpenAI(rawKey, history) {
+async function askOpenAI(rawKey, history, style) {
   // Nettoie la clé de façon défensive contre les erreurs de .env courantes :
   //  - nom de variable recollé dans la valeur (OPENAI_API_KEY=OPENAI_API_KEY=sk-...)
   //  - guillemets autour de la valeur
@@ -144,6 +148,7 @@ async function askOpenAI(rawKey, history) {
     max_tokens: config.ai?.maxTokens || 400,
     messages: [
       { role: 'system', content: buildKnowledge() },
+      { role: 'system', content: style },
       {
         role: 'user',
         content:
@@ -209,15 +214,14 @@ async function handleTicketMessage(message) {
     inFlight.add(channel.id);
     try {
       await channel.sendTyping().catch(() => {});
-      const history = await buildHistory(channel, guild.id);
+      const { text: history, botReplies } = await buildHistory(channel, guild.id);
       if (!history) return;
-      const reply = await askOpenAI(apiKey, history);
+      const reply = await askOpenAI(apiKey, history, styleDirective(channel.id, botReplies));
       // Re-vérifie qu'aucun staff n'a claim pendant la génération.
       if (db.tickets[channel.id]?.claimedBy) return;
       // Échec API (quota, réseau, etc.) : au lieu du silence ("il se désiste"),
       // on rassure le client et on laisse la main au staff.
-      const out = reply
-        || 'Merci pour ton message ! Un membre du staff va te répondre rapidement.';
+      const out = reply || fallbackReply();
       await channel.send({ content: out, components: [stopRow()], allowedMentions: { parse: [] } }).catch(() => {});
       lastReplyAt.set(channel.id, Date.now());
     } finally {
