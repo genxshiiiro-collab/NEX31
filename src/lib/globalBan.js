@@ -131,8 +131,53 @@ async function banEverywhere(client, id, reason, deleteSeconds = 0) {
   return ok;
 }
 
-/** Ajoute `ids` à la blacklist globale puis les bannit partout. */
-async function globalBan(client, ids, { reason, by, deleteSeconds = 0 }) {
+/**
+ * Après un ban global : passe en revue les membres de tous les serveurs et
+ * traite les comptes qui ressemblent aux bannis. Ressemblance forte = lié et
+ * banni partout ; moyenne = expulsé de tous les serveurs.
+ * Jamais : staff, bots, propriétaires des serveurs.
+ */
+async function sweepAlts(client, bannedIds) {
+  const { isStaff } = require('./helpers');
+  const found = new Map(); // userId -> { user, match }
+  for (const guild of client.guilds.cache.values()) {
+    const members = await guild.members.fetch().catch(() => guild.members.cache);
+    for (const member of members.values()) {
+      if (member.user.bot || member.id === guild.ownerId || db.globalBans[member.id] || isStaff(member)) continue;
+      for (const id of bannedIds) {
+        const ban = db.globalBans[id];
+        if (!ban) continue;
+        const res = scoreAgainst(member.user, ban);
+        if (res.score >= QUARANTINE_SCORE && res.score > (found.get(member.id)?.match.score || 0)) {
+          found.set(member.id, { user: member.user, match: { id, ban, ...res } });
+        }
+      }
+    }
+  }
+
+  const sweep = { banned: [], kicked: [] };
+  for (const [userId, { user, match }] of found) {
+    if (match.score >= AUTO_BAN_SCORE) {
+      link(match.id, userId);
+      await globalBan(client, [userId], { reason: `Alt de ${match.id} — ${match.ban.reason}`, by: client.user.id, sweep: false });
+      sweep.banned.push({ id: userId, tag: user.tag, of: match.id, why: match.reasons.join(', ') });
+      continue;
+    }
+    for (const guild of client.guilds.cache.values()) {
+      const member = guild.members.cache.get(userId);
+      await member?.kick(`Alt suspect de ${match.id} (ban global)`).catch(() => {});
+    }
+    sweep.kicked.push({ id: userId, tag: user.tag, of: match.id, why: match.reasons.join(', ') });
+  }
+  return sweep;
+}
+
+/**
+ * Ajoute `ids` à la blacklist globale, les bannit partout, puis (sauf
+ * sweep: false) cherche leurs autres comptes sur les serveurs du bot.
+ * Le résultat porte `.sweep = { banned, kicked }`.
+ */
+async function globalBan(client, ids, { reason, by, deleteSeconds = 0, sweep = true }) {
   const results = [];
   for (const id of ids) {
     const user = await client.users.fetch(id, { force: true }).catch(() => null);
@@ -141,6 +186,18 @@ async function globalBan(client, ids, { reason, by, deleteSeconds = 0 }) {
     };
     save();
     results.push({ id, guilds: await banEverywhere(client, id, reason, deleteSeconds) });
+  }
+  results.sweep = sweep ? await sweepAlts(client, ids) : { banned: [], kicked: [] };
+  const { banned, kicked } = results.sweep;
+  if (banned.length || kicked.length) {
+    const line = (a) => `<@${a.id}> (${a.tag}) — ressemble à \`${a.of}\` : ${a.why}`;
+    logAll(client, {
+      level: 'error', title: 'Autres comptes du banni traités',
+      fields: [
+        ...(banned.length ? [{ name: `Bannis partout (${banned.length})`, value: banned.map(line).join('\n').slice(0, 1000) }] : []),
+        ...(kicked.length ? [{ name: `Expulsés de tous les serveurs (${kicked.length})`, value: kicked.map(line).join('\n').slice(0, 1000) }] : []),
+      ],
+    });
   }
   return results;
 }
