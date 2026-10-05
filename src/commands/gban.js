@@ -58,9 +58,9 @@ async function execute(interaction) {
         { name: 'Raison', value: reason, inline: true },
       ],
     });
-    const { banned, kicked } = results.sweep;
-    const sweepLine = banned.length || kicked.length
-      ? `\n\n**Autres comptes trouvés** — ${banned.length} banni(s) partout, ${kicked.length} expulsé(s) de tous les serveurs (détail dans les logs).`
+    const { banned } = results.sweep;
+    const sweepLine = banned.length
+      ? `\n\n**Autres comptes trouvés et bannis partout** — ${banned.map((a) => `<@${a.id}>`).join(', ')}`
       : '\n\nAucun autre compte ressemblant trouvé sur les serveurs.';
     const reply = card('Ban global appliqué', `${lines}\n\nRaison : ${reason}${sweepLine}`);
     reply.components[0].addActionRowComponents(new ActionRowBuilder().addComponents(

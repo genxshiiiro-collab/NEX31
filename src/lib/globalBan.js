@@ -133,8 +133,8 @@ async function banEverywhere(client, id, reason, deleteSeconds = 0) {
 
 /**
  * Après un ban global : passe en revue les membres de tous les serveurs et
- * traite les comptes qui ressemblent aux bannis. Ressemblance forte = lié et
- * banni partout ; moyenne = expulsé de tous les serveurs.
+ * bannit les comptes qui ressemblent aux bannis : chacun est lié et
+ * banni partout avec lui (score de 60 ou plus).
  * Jamais : staff, bots, propriétaires des serveurs.
  */
 async function sweepAlts(client, bannedIds) {
@@ -155,19 +155,12 @@ async function sweepAlts(client, bannedIds) {
     }
   }
 
-  const sweep = { banned: [], kicked: [] };
+  // Tout compte trouvé est lié au banni et banni partout avec lui.
+  const sweep = { banned: [] };
   for (const [userId, { user, match }] of found) {
-    if (match.score >= AUTO_BAN_SCORE) {
-      link(match.id, userId);
-      await globalBan(client, [userId], { reason: `Alt de ${match.id} — ${match.ban.reason}`, by: client.user.id, sweep: false });
-      sweep.banned.push({ id: userId, tag: user.tag, of: match.id, why: match.reasons.join(', ') });
-      continue;
-    }
-    for (const guild of client.guilds.cache.values()) {
-      const member = guild.members.cache.get(userId);
-      await member?.kick(`Alt suspect de ${match.id} (ban global)`).catch(() => {});
-    }
-    sweep.kicked.push({ id: userId, tag: user.tag, of: match.id, why: match.reasons.join(', ') });
+    link(match.id, userId);
+    await globalBan(client, [userId], { reason: `Alt de ${match.id} — ${match.ban.reason}`, by: client.user.id, sweep: false });
+    sweep.banned.push({ id: userId, tag: user.tag, of: match.id, why: match.reasons.join(', ') });
   }
   return sweep;
 }
@@ -175,7 +168,7 @@ async function sweepAlts(client, bannedIds) {
 /**
  * Ajoute `ids` à la blacklist globale, les bannit partout, puis (sauf
  * sweep: false) cherche leurs autres comptes sur les serveurs du bot.
- * Le résultat porte `.sweep = { banned, kicked }`.
+ * Le résultat porte `.sweep = { banned }`.
  */
 async function globalBan(client, ids, { reason, by, deleteSeconds = 0, sweep = true }) {
   const results = [];
@@ -187,16 +180,13 @@ async function globalBan(client, ids, { reason, by, deleteSeconds = 0, sweep = t
     save();
     results.push({ id, guilds: await banEverywhere(client, id, reason, deleteSeconds) });
   }
-  results.sweep = sweep ? await sweepAlts(client, ids) : { banned: [], kicked: [] };
-  const { banned, kicked } = results.sweep;
-  if (banned.length || kicked.length) {
+  results.sweep = sweep ? await sweepAlts(client, ids) : { banned: [] };
+  const { banned } = results.sweep;
+  if (banned.length) {
     const line = (a) => `<@${a.id}> (${a.tag}) — ressemble à \`${a.of}\` : ${a.why}`;
     logAll(client, {
-      level: 'error', title: 'Autres comptes du banni traités',
-      fields: [
-        ...(banned.length ? [{ name: `Bannis partout (${banned.length})`, value: banned.map(line).join('\n').slice(0, 1000) }] : []),
-        ...(kicked.length ? [{ name: `Expulsés de tous les serveurs (${kicked.length})`, value: kicked.map(line).join('\n').slice(0, 1000) }] : []),
-      ],
+      level: 'error', title: 'Autres comptes du banni bannis partout',
+      fields: [{ name: `Comptes (${banned.length})`, value: banned.map(line).join('\n').slice(0, 1000) }],
     });
   }
   return results;
