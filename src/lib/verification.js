@@ -33,6 +33,8 @@ function panelMessage() {
     .addSeparatorComponents(separator())
     .addTextDisplayComponents(text([
       'Bienvenue. Clique sur **Vérifier** pour accéder au serveur.',
+      '',
+      '**Important :** une fois vérifié, ouvre **Salons et rôles** (en haut de la liste des salons) et **coche tous les salons**, sinon une partie du serveur restera masquée pour toi.',
       `-# Ton compte Discord doit avoir au moins ${Math.round(MIN_AGE_DAYS / 30)} mois.`,
     ].join('\n')))
     .addActionRowComponents(new ActionRowBuilder().addComponents(
@@ -186,7 +188,7 @@ async function handleVerify(interaction) {
 
   await member.roles.remove(cfg.roleId, 'Vérifié');
   log.event(guild, { level: 'success', scope: 'verif', title: 'Membre vérifié', description: `<@${member.id}> (${user.tag}) — compte de ${ageDays} jours` });
-  return say('Vérifié. Bienvenue sur le serveur.');
+  return say('Vérifié. Bienvenue sur le serveur. Pense à ouvrir **Salons et rôles** (en haut de la liste des salons) et à **cocher tous les salons** pour tout voir.');
 }
 
 // --- Boutons du DM de validation ---
