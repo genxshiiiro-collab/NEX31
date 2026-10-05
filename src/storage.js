@@ -18,9 +18,10 @@ const DEFAULT_DB = {
   checkpoints: {}, // checkpointId (CP-0001) -> suivi commande + rappels (voir lib/checkpoints.js)
   memberJoins: {}, // guildId -> { userId -> { inviterId, code, type, joinedAt } } (arrivées : qui a invité)
   globalBans: {}, // userId -> { tag, names, avatar, createdAt, reason, by, date } (ban global tous serveurs)
-  altLinks: {},
+  altLinks: {},   // userId -> [ userId, ... ] (comptes liés au même joueur)
   verif: {},        // guildId -> { roleId, channelId, panelMessageId } (rôle Visiteur + #vérification)
-  verifPending: {}, // 'guildId:userId' -> { at, matchId } (en attente de validation en DM)   // userId -> [ userId, ... ] (comptes liés au même joueur)
+  verifPending: {}, // 'guildId:userId' -> { at, matchId } (en attente de validation en DM)
+  honeypot: {},     // guildId -> { channelId, messageId } (salon piège : message = ban global)
   aiState: {},   // guildId -> { enabled: bool } (override /ai on|off ; défaut = config.ai.enabled)
   counters: { review: 0, order: 0, payment: 0, checkpoint: 0 },
 };
