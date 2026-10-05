@@ -20,6 +20,7 @@ const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMessages,
   GatewayIntentBits.MessageContent, // intent privilégié — à activer dans le portail Discord
+  GatewayIntentBits.GuildModeration, // journal d'audit en direct (anti-nuke) — non privilégié
   // GuildMembers volontairement omis par défaut : intent privilégié souvent désactivé.
   // Les pastilles utilisent message.member + fetch ponctuel (ticketPastille.js).
 ];

@@ -6,3 +6,4 @@ _sim.js
 _watch.js
 *.log
 .DS_Store
+data/backups/

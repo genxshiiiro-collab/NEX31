@@ -197,6 +197,16 @@ const shared = {
   //  (à défaut : logChannelId).
   memberTracking: { enabled: true },
 
+  // ---- Protection (anti-raid, anti-nuke, phishing, usurpation, sauvegardes) ----
+  //  Alertes en DM aux IDs de GBAN_OWNERS (.env), sinon au propriétaire du serveur.
+  protect: {
+    raid: { joins: 8, seconds: 15, banJoiners: true }, // 8 arrivées en 15 s = lockdown + ban des arrivants
+    nuke: { whitelist: [] },                           // IDs jamais sanctionnés par l'anti-nuke (bots de confiance...)
+    phishing: { enabled: true },
+    impersonation: { enabled: true },
+    backup: { keep: 7 },                               // sauvegardes quotidiennes gardées
+  },
+
   // ---- Support IA (OpenAI) : réponses autonomes dans les tickets ----
   //  Nécessite OPENAI_API_KEY dans .env. L'IA répond aux messages du client
   //  tant qu'aucun staff n'a cliqué "Prendre en charge" (claim). Après claim,

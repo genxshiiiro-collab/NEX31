@@ -28,6 +28,8 @@ const ACCESS = {
   gban: 'admin',
   verif: 'admin',
   scan: 'admin',
+  lockdown: 'admin',
+  backup: 'admin',
 };
 
 function accessFor(commandName) {
