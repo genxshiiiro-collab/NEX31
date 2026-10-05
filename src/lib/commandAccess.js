@@ -27,6 +27,7 @@ const ACCESS = {
   ai: 'admin',
   gban: 'admin',
   verif: 'admin',
+  scan: 'admin',
 };
 
 function accessFor(commandName) {
