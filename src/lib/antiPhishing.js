@@ -109,8 +109,10 @@ async function onMessage(message) {
     return true;
   }
 
-  const ids = gb.cluster(message.author.id).filter((id) => !db.globalBans[id]);
-  await gb.globalBan(message.client, ids, { reason: `Lien de phishing (${hit.host})`, by: message.client.user.id, deleteSeconds: 3600 });
+  // L'auteur est banni ; ses autres comptes sont expulsés par globalBan.
+  if (!db.globalBans[message.author.id]) {
+    await gb.globalBan(message.client, [message.author.id], { reason: `Lien de phishing (${hit.host})`, by: message.client.user.id, deleteSeconds: 3600 });
+  }
   gb.logAll(message.client, { level: 'error', title: 'Phishing : ban global', fields });
   return true;
 }

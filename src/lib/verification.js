@@ -166,9 +166,9 @@ async function handleVerify(interaction) {
   if (score >= gb.AUTO_BAN_SCORE) {
     await say('Accès refusé.');
     gb.link(match.id, member.id);
-    await gb.globalBan(interaction.client, [member.id], { reason: `Alt de ${match.id} — ${match.ban.reason}`, by: interaction.client.user.id });
+    await gb.kickEverywhere(interaction.client, member.id, `Autre compte de ${match.id} (ban global)`);
     gb.logAll(interaction.client, {
-      level: 'error', title: 'Alt banni à la vérification',
+      level: 'warn', title: "Autre compte d'un banni expulsé à la vérification",
       fields: [{ name: 'Compte', value: `<@${member.id}> (${user.tag})` }, { name: 'Score', value: `${score} — ${match.reasons.join(', ')}` }],
     });
     return;

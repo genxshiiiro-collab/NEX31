@@ -70,8 +70,8 @@ async function onMessage(message) {
   if (member && isStaff(member)) return true;
 
   const reason = 'Message dans le salon piège (compte piraté / bot de spam)';
-  const ids = gb.cluster(message.author.id);
-  const results = await gb.globalBan(message.client, ids, { reason, by: message.client.user.id, deleteSeconds: DELETE_SECONDS });
+  // L'auteur est banni ; ses autres comptes sont expulsés par globalBan.
+  const results = await gb.globalBan(message.client, [message.author.id], { reason, by: message.client.user.id, deleteSeconds: DELETE_SECONDS });
   gb.logAll(message.client, {
     level: 'error', title: 'Salon piège : ban global',
     fields: [

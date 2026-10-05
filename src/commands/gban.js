@@ -45,8 +45,8 @@ async function execute(interaction) {
     }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     for (const alt of gb.parseIds(interaction.options.getString('alts'))) gb.link(user.id, alt);
-    const ids = gb.cluster(user.id);
-    const results = await gb.globalBan(client, ids, {
+    // Seul ce compte est banni ; ses autres comptes (liés ou ressemblants) sont expulsés.
+    const results = await gb.globalBan(client, [user.id], {
       reason, by: interaction.user.id, deleteSeconds: (interaction.options.getInteger('supprimer_jours') || 0) * 86400,
     });
     const lines = results.map((r) => `<@${r.id}> (\`${r.id}\`) — ${r.guilds}/${client.guilds.cache.size} serveur(s)`).join('\n');
@@ -58,10 +58,10 @@ async function execute(interaction) {
         { name: 'Raison', value: reason, inline: true },
       ],
     });
-    const { banned } = results.sweep;
-    const sweepLine = banned.length
-      ? `\n\n**Autres comptes trouvés et bannis partout** — ${banned.map((a) => `<@${a.id}>`).join(', ')}`
-      : '\n\nAucun autre compte ressemblant trouvé sur les serveurs.';
+    const { kicked } = results.sweep;
+    const sweepLine = kicked.length
+      ? `\n\n**Autres comptes expulsés de tous les serveurs** — ${kicked.map((a) => `<@${a.id}>`).join(', ')}`
+      : '\n\nAucun autre compte trouvé sur les serveurs.';
     const reply = card('Ban global appliqué', `${lines}\n\nRaison : ${reason}${sweepLine}`);
     reply.components[0].addActionRowComponents(new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`gban:unban:${user.id}`).setLabel('Lever ce gban').setStyle(ButtonStyle.Secondary),
@@ -97,8 +97,8 @@ async function execute(interaction) {
     }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const toBan = group.filter((x) => !db.globalBans[x]);
-    await gb.globalBan(client, toBan, { reason: `Alt de ${banned} — ${db.globalBans[banned].reason}`, by: interaction.user.id });
-    return interaction.editReply(card('Alt lié et banni', `${toBan.map((x) => `<@${x}>`).join(', ')} rejoint le ban de \`${banned}\`.`));
+    for (const id of toBan) await gb.kickEverywhere(client, id, `Autre compte de ${banned} (ban global)`);
+    return interaction.editReply(card('Alt lié et expulsé', `${toBan.map((x) => `<@${x}>`).join(', ')} expulsé(s) de tous les serveurs (autre compte de \`${banned}\`, banni).`));
   }
 
   if (sub === 'list') {
