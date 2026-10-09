@@ -144,7 +144,7 @@ const server = {
     },
     advanced: {
       name: 'Advanced Server',
-      price: '90 €',
+      price: '105 €',
       delivery: '8–10 jours',
       inheritsFrom: 'intermediate',
       totals: [
@@ -159,7 +159,7 @@ const server = {
     },
     elite: {
       name: 'Elite Server',
-      price: '140 €',
+      price: '190 €',
       delivery: '8–12 jours',
       inheritsFrom: 'advanced',
       totals: [
