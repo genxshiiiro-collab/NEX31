@@ -111,7 +111,7 @@ const studio = {
 //  PACKS SERVER
 // ---------------------------------------------------------------------
 const server = {
-  order: ['starter', 'intermediate', 'advanced', 'elite'],
+  order: ['starter', 'advanced', 'elite'],
   color: COLORS.server,
   items: {
     starter: {
@@ -128,38 +128,27 @@ const server = {
         '1 Bannière Publicitaire / Promotionnelle',
       ],
     },
-    intermediate: {
-      name: 'Intermediate Server',
-      price: '50 €',
-      delivery: '5–8 jours',
-      inheritsFrom: 'starter',
-      content: [
-        "Bannière D'Invitation Discord",
-        'Bannière FiveM List',
-        '1 Bannière Publicitaire Horizontale',
-        '1 Bannière Publicitaire Verticale',
-        '3 Icônes Personnalisées',
-        '1 Team Flag',
-      ],
-    },
     advanced: {
       name: 'Advanced Server',
-      price: '105 €',
+      price: '110 €',
       delivery: '8–10 jours',
-      inheritsFrom: 'intermediate',
+      inheritsFrom: 'starter',
       totals: [
         '5 Bannières Publicitaires Horizontales Au Total',
         '4 Bannières Publicitaires Verticales Au Total',
         '6 Icônes Personnalisées Au Total',
       ],
       content: [
+        "Bannière D'Invitation Discord",
+        'Bannière FiveM List',
+        '1 Team Flag',
         'Loading Screen Sans Script',
         'Bannières De Statut Serveur',
       ],
     },
     elite: {
       name: 'Elite Server',
-      price: '190 €',
+      price: '200 €',
       delivery: '8–12 jours',
       inheritsFrom: 'advanced',
       totals: [
@@ -189,7 +178,6 @@ const checkpointConfig = {
   // Durée maximale d'un projet selon le pack (en jours).
   durationsInDays: {
     starter: 2,
-    intermediate: 5,
     advanced: 8,
     elite: 12,
   },
