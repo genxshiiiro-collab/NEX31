@@ -27,6 +27,7 @@ const ACCESS = {
   ai: 'admin',
   gban: 'admin',
   verif: 'admin',
+  school: 'admin',
   scan: 'admin',
   lockdown: 'admin',
   backup: 'admin',
